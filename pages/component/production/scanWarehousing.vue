@@ -15,11 +15,11 @@
 					生产单号:
 					<text>{{ form.finBillNo }}</text>
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="Modal"><text class="cuIcon-scan"></text></button>
+				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="1"><text class="cuIcon-scan"></text></button>
 			</view>
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
-					<view style="width: 90px;">部门:</view>
+					<view style="width: 40px;">部门:</view>
 					<ld-select :list="deptList" list-key="FName" value-key="FNumber" placeholder="请选择" clearable v-model="form.fdeptID" @change="deptChange"></ld-select>
 				</view>
 				<view class="action">
@@ -32,10 +32,10 @@
 					<view class="title">产品:</view>
 					<input name="input" style="font-size: 13px;text-align: left;" v-model="form.fnote" />
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="Modal"><text class="cuIcon-scan"></text></button>
+				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="2"><text class="cuIcon-scan"></text></button>
 			</view>
 		</view>
-		<scroll-view scroll-x class="bg-white nav text-center margin-top"  :style="[{ top: CustomBar + 'px' }]">
+		<scroll-view scroll-x class="bg-white nav text-center margin-top" :style="[{ top: CustomBar + 'px' }]">
 			<view class="cu-item" :class="index == TabCur ? 'text-blue cur' : ''" v-for="(item, index) in tabNav" :key="index" @tap="tabSelect" :data-id="index">
 				{{ tabNav[index] }}
 			</view>
@@ -46,24 +46,29 @@
 					<text class="cuIcon-title text-blue"></text>
 					装箱码:
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="Modal"><text class="cuIcon-scan"></text></button>
+				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="3"><text class="cuIcon-scan"></text></button>
 			</view>
-			<scroll-view scroll-y class="page" :style="{ 'height': pageHeight + 'px' }">
-				<view v-for="(item,index) in cuIList" :key="index">
-						<view class="cu-list menu-avatar">
-							<view class="cu-item" style="width: 100%;margin-top: 2px;height: 320upx;"  :class="modalName=='move-box-'+ index?'move-cur':''" 
-						 @touchstart="ListTouchStart" @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index" >
-								<view style="clear: both;width: 100%;">
-									<view style="clear: both;width: 100%;" class="grid text-center col-2" @tap="showModal2(index, item)" data-target="Modal" data-number="item.number">
-										<view class="text-grey">机身码:{{item.index=(index + 1)}}</view>
-										<view class="text-grey">产品码:{{item.number}}</view>
-									</view>
-								</view>
-								<view class="move">
-									<view class="bg-red" @tap="del(index,item)">删除</view>
+			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
+				<view v-for="(item, index) in cuIList" :key="index">
+					<view class="cu-list menu-avatar">
+						<view
+							class="cu-item"
+							style="width: 100%;margin-top: 2px;height: 120upx;"
+							:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
+							@touchstart="ListTouchStart"
+							@touchmove="ListTouchMove"
+							@touchend="ListTouchEnd"
+							:data-target="'move-box-' + index"
+						>
+							<view style="clear: both;width: 100%;">
+								<view style="clear: both;width: 100%;" class="grid text-center col-2"  data-target="Modal" data-number="item.number">
+									<view class="text-grey">机身码:{{ (item.index = index + 1) }}</view>
+									<view class="text-grey">产品码:{{ item.number }}</view>
 								</view>
 							</view>
+							<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
 						</view>
+					</view>
 				</view>
 				<view class="cu-bar tabbar shadow foot">
 					<view class="box text-center">
@@ -73,23 +78,28 @@
 			</scroll-view>
 		</block>
 		<block v-if="TabCur == 1">
-			<scroll-view scroll-y class="page" :style="{ 'height': pageHeight + 'px' }">
-				<view v-for="(item,index) in cuIList" :key="index">
-						<view class="cu-list menu-avatar">
-							<view class="cu-item" style="width: 100%;margin-top: 2px;height: 320upx;"  :class="modalName=='move-box-'+ index?'move-cur':''" 
-						 @touchstart="ListTouchStart" @touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index" >
-								<view style="clear: both;width: 100%;">
-									<view style="clear: both;width: 100%;" class="grid text-center col-2" @tap="showModal2(index, item)" data-target="Modal" data-number="item.number">
-										<view class="text-grey">机身码:{{item.index=(index + 1)}}</view>
-										<view class="text-grey">产品码:{{item.number}}</view>
-										<view class="text-grey">包装码:{{item.name}}</view>
-									</view>
-								</view>
-								<view class="move">
-									<view class="bg-red" @tap="del(index,item)">删除</view>
+			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
+				<view v-for="(item, index) in cuIList" :key="index">
+					<view class="cu-list menu-avatar">
+						<view
+							class="cu-item"
+							style="width: 100%;margin-top: 2px;height: 120upx;"
+							:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
+							@touchstart="ListTouchStart"
+							@touchmove="ListTouchMove"
+							@touchend="ListTouchEnd"
+							:data-target="'move-box-' + index"
+						>
+							<view style="clear: both;width: 100%;">
+								<view style="clear: both;width: 100%;" class="grid text-center col-3" data-target="Modal" data-number="item.number">
+									<view class="text-grey">机身码:{{ (item.index = index + 1) }}</view>
+									<view class="text-grey">产品码:{{ item.number }}</view>
+									<view class="text-grey">包装码:{{ item.name }}</view>
 								</view>
 							</view>
+							<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
 						</view>
+					</view>
 				</view>
 				<view class="cu-bar tabbar shadow foot">
 					<view class="box text-center">
@@ -101,13 +111,13 @@
 		<view class="cu-modal" :class="modalName == 'Modal' ? 'show' : ''">
 			<view class="cu-dialog" style="height: 350upx;">
 				<view class="cu-bar bg-white justify-end" style="height: 60upx;">
-					<view class="content">温馨提示</view>
+					<view class="content">扫描信息</view>
 					<view class="action" @tap="hideModal"><text class="cuIcon-close text-red"></text></view>
 				</view>
 				<view class="padding-sm">
 					<view class="cu-item">
 						<view class="content">
-							<text class="text-grey">用户：{{ form.username }}</text>
+							<text class="text-grey">条码信息：{{ scanResult }}</text>
 						</view>
 						<view class="action"><text class="text-grey"></text></view>
 					</view>
@@ -131,6 +141,7 @@ export default {
 			TabCur: 0,
 			pageHeight: 0,
 			headName: '',
+			scanResult: '',
 			isOrder: false,
 			loadModal: false,
 			onoff: true,
@@ -138,6 +149,7 @@ export default {
 			pickerVal: null,
 			modalName: null,
 			modalName2: null,
+			scanChoice: null,
 			gridCol: 3,
 			form: {
 				finBillNo: null,
@@ -156,8 +168,16 @@ export default {
 			endDate: null
 		};
 	},
+	onUnload() {
+		// 移除监听事件
+		uni.$off('scancodedate');
+	},
 	onLoad: function(option) {
 		let me = this;
+		uni.$on('scancodedate', function(data) {
+			// _this 这里面的方法用这个 _this.code(data.code)
+			me.getScanInfo(data.code);
+		});
 		if (JSON.stringify(option) != '{}') {
 			this.isOrder = true;
 			me.form.fdeptID = option.FDeptNumber;
@@ -379,11 +399,14 @@ export default {
 			this.cuIList.splice(index, 1);
 		},
 		showModal(e) {
-			this.fabClick();
-			/* this.modalName = e.currentTarget.dataset.target; */
+			/* this.fabClick(); */
+			this.scanChoice = null;
+			this.scanChoice = e.currentTarget.dataset.target;
+			this.modalName = "Modal";
 		},
 		hideModal(e) {
 			this.modalName = null;
+			this.scanChoice = null;
 		},
 		// 查询前后三天日期
 		getDay(date, day) {
@@ -419,101 +442,96 @@ export default {
 		},
 		fabClick() {
 			var that = this;
+			let number = 0;
 			uni.scanCode({
 				success: function(res) {
-					basic
-						.barcodeScan({ uuid: res.result })
-						.then(reso => {
-							if (reso.success) {
-								if (that.isOrder) {
-									console.log(reso.data);
-									//if(reso.data['billNo'] == this.billNo){
-									let number = 0;
-									for (let i in that.cuIList) {
-										if (reso.data['number'] == that.cuIList[i]['number']) {
-											if (reso.data['stockNumber'] == that.cuIList[i]['stockId'] && reso.data['batchNo'] == that.cuIList[i]['fbatchNo']) {
-												if (reso.data['quantity'] == null) {
-													reso.data['quantity'] = 1;
-												}
-												if (reso.data['isEnable'] == 2) {
-													reso.data['uuid'] = null;
-												}
-												that.cuIList[i]['quantity'] = parseFloat(that.cuIList[i]['quantity']) + parseFloat(reso.data['quantity']);
-												number++;
-												break;
-											}
-										} else {
-											uni.showToast({
-												icon: 'none',
-												title: '该物料不在所选列表中！'
-											});
-											number++;
-											break;
-										}
-									}
-									if (number == 0) {
-										if (reso.data['quantity'] == null) {
-											reso.data['quantity'] = 1;
-										}
-										if (reso.data['isEnable'] == 2) {
-											reso.data['uuid'] = null;
-										}
-										reso.data.stockName = reso.data.stockNumber;
-										reso.data.stockId = reso.data.warehouse;
-										reso.data.FIsStockMgr = reso.data.FIsStockMgr;
-										reso.data.fbatchNo = reso.data.batchNo;
-										that.cuIList.push(reso.data);
-									}
-									/* }else{
-									uni.showToast({
-										icon: 'none',
-										title: '该物料不在所选单据中！',
-									});
-								} */
-								} else {
-									let number = 0;
-									for (let i in that.cuIList) {
-										if (
-											reso.data['number'] == that.cuIList[i]['number'] &&
-											reso.data['stockNumber'] == that.cuIList[i]['stockId'] &&
-											reso.data['batchNo'] == that.cuIList[i]['fbatchNo']
-										) {
-											if (reso.data['quantity'] == null) {
-												reso.data['quantity'] = 1;
-											}
-											if (reso.data['isEnable'] == 2) {
-												reso.data['uuid'] = null;
-											}
-											that.cuIList[i]['quantity'] = parseFloat(that.cuIList[i]['quantity']) + parseFloat(reso.data['quantity']);
-											number++;
-											break;
-										}
-									}
-									if (number == 0) {
-										if (reso.data['quantity'] == null) {
-											reso.data['quantity'] = 1;
-										}
-										if (reso.data['isEnable'] == 2) {
-											reso.data['uuid'] = null;
-										}
-										reso.data.stockName = reso.data.stockNumber;
-										reso.data.stockId = reso.data.warehouse;
-										reso.data.FIsStockMgr = reso.data.FIsStockMgr;
-										reso.data.fbatchNo = reso.data.batchNo;
-										that.cuIList.push(reso.data);
-									}
-								}
-							}
-						})
-						.catch(err => {
-							uni.showToast({
-								icon: 'none',
-								title: err.msg
-							});
-						});
+					that.getScanInfo(res.result);
 				}
 			});
-		}, // ListTouch触摸开始
+		},
+		getScanInfo(res) {
+			var that = this;
+			let number = 0;
+			switch(that.scanChoice){
+				case '1':
+				that.scanResult = res;
+				that.hideModal();
+				break;
+				case '2':
+				that.scanResult = res;
+				that.hideModal();
+				break;
+				case '3':
+				that.scanResult = res;
+				that.hideModal();
+				break;
+				default:
+				uni.showToast({
+					icon: 'none',
+					title: '请点击扫描按钮，再调用扫描'
+				});
+			}
+			/* basic
+				.inventoryByBarcode({ uuid: res })
+				.then(reso => {
+					console.log(reso);
+					if (reso.success) {
+						let data = reso.data;
+						for (let i in that.cuIList) {
+							console.log(data[0]['FItemID'] == that.cuIList[i]['FItemID']);
+							console.log(data[0]['FItemID'] + ',' + that.cuIList[i]['FItemID']);
+							if (data[0]['FItemID'] == that.cuIList[i]['FItemID']) {
+								number++;
+								uni.showToast({
+									icon: 'none',
+									title: '该物料已存在'
+								});
+								break;
+							}
+						}
+						if (number == 0) {
+							data[0].number = data[0].FNumber;
+							data[0].name = data[0].FName;
+							data[0].unitName = data[0].FUnitName;
+							data[0].model = data[0].FModel;
+							for (var i = 0; i < data.length; i++) {
+								data[i].number = data[i].FNumber;
+								data[i].name = data[i].FName;
+								data[i].unitName = data[i].FUnitName;
+								data[i].model = data[i].FModel;
+								data[i].quantity = 0;
+								data[i].checked = false;
+								data[i].stockName = data[i].FStockName;
+								data[i].stockId = data[i].FStockNumber;
+								data[i].FIsStockMgr = data[i].FIsStockMgr;
+								data[i].fbatchNo = data[i].FBatchNo;
+								data[i].unitID = data[i].FUnitID;
+							}
+							that.cuIList.push({
+								number: data[0].FNumber,
+								name: data[0].FName,
+								FItemID: data[0].FItemID,
+								checked: false,
+								isLoading: false,
+								FCounty: 0,
+								unitName: data[0].FUnitName,
+								model: data[0].FModel,
+								childrenList: data
+							});
+							console.log(data);
+							that.form.bNum = that.cuIList.length;
+						}
+						console.log(that.cuIList);
+					}
+				})
+				.catch(err => {
+					uni.showToast({
+						icon: 'none',
+						title: err.msg
+					});
+				}); */
+		},
+		// ListTouch触摸开始
 		ListTouchStart(e) {
 			this.listTouchStart = e.touches[0].pageX;
 		},
@@ -537,7 +555,6 @@ export default {
 </script>
 
 <style>
-
 .cu-modal.cu-item {
 	float: left;
 	width: 50%;
@@ -571,7 +588,6 @@ export default {
 }
 .cu-bar {
 	min-height: 30px;
-	
 }
 /* .page {
 		height: calc(100vh - 320upx);

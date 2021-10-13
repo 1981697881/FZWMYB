@@ -25,22 +25,17 @@ export default {
 	},
 	methods: {
 		initScan() {
-			let _this = this;
-			main = plus.android.runtimeMainActivity(); //获取activity
-			var IntentFilter = plus.android.importClass('android.content.IntentFilter');
-			var Intent = plus.android.importClass('android.content.Intent');
-			filter = new IntentFilter();
-			//监听扫描
-			filter.addAction('nlscan.action.SCANNER_RESULT'); // 广播动作
-			receiver = plus.android.implements('io.dcloud.feature.internal.reflect.BroadcastReceiver', {
-				onReceive: function(context, intent) {
-					plus.android.importClass(intent);
-					let code = intent.getStringExtra('SCAN_BARCODE1'); // 广播标签
-					//调用方法 
-					_this.queryCode(code);
-				}
-			});
-			console.log(receiver)
+		    let _this = this;  
+		    main = plus.android.runtimeMainActivity();//获取activity  
+		    var IntentFilter = plus.android.importClass('android.content.IntentFilter');   
+		    filter = new IntentFilter();   
+		    filter.addAction("android.intent.action.SCANRESULT"); // 换你的广播动作  
+		    receiver = plus.android.implements('io.dcloud.feature.internal.reflect.BroadcastReceiver',{  
+		    onReceive : function(context, intent) {  
+		        plus.android.importClass(intent);     
+		        let code = intent.getStringExtra("value");// 换你的广播标签  
+		        _this.queryCode(code);  
+		    }});
 		},
 		startScan() {
 			 //注册监听
@@ -51,7 +46,6 @@ export default {
 			main.unregisterReceiver(receiver);
 		},
 		queryCode: function(code) {
-			console.log(_codeQueryTag);
 			//防重复
 			if (_codeQueryTag) return false;
 			_codeQueryTag = true;
@@ -59,7 +53,6 @@ export default {
 				_codeQueryTag = false;
 			}, 150);
 			var id = code;
-			console.log('id:', id);
 			uni.$emit('scancodedate', { code: id });
 		}
 	}

@@ -61,7 +61,7 @@
 							:data-target="'move-box-' + index"
 						>
 							<view style="clear: both;width: 100%;">
-								<view style="clear: both;width: 100%;" class="grid text-center col-2"  data-target="Modal" data-number="item.number">
+								<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
 									<view class="text-grey">机身码:{{ (item.index = index + 1) }}</view>
 									<view class="text-grey">产品码:{{ item.number }}</view>
 								</view>
@@ -72,14 +72,14 @@
 				</view>
 				<view class="cu-bar tabbar shadow foot">
 					<view class="box text-center">
-						<button :disabled="isClick" class="cu-btn bg-green shadow-blur round lg" style="width: 40%;" @tap="$manyCk(saveData)">提交</button>
+						<button :disabled="isClick" class="cu-btn bg-blue shadow-blur round lg" style="width: 40%;" @tap="$manyCk(packingData)">装箱</button>
 					</view>
 				</view>
 			</scroll-view>
 		</block>
 		<block v-if="TabCur == 1">
 			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
-				<view v-for="(item, index) in cuIList" :key="index">
+				<view v-for="(item, index) in boxList" :key="index">
 					<view class="cu-list menu-avatar">
 						<view
 							class="cu-item"
@@ -97,13 +97,13 @@
 									<view class="text-grey">包装码:{{ item.name }}</view>
 								</view>
 							</view>
-							<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
+							<view class="move"><view class="bg-red" @tap="delBox(index, item)">删除</view></view>
 						</view>
 					</view>
 				</view>
 				<view class="cu-bar tabbar shadow foot">
 					<view class="box text-center">
-						<button :disabled="isClick" class="cu-btn bg-green shadow-blur round lg" style="width: 40%;" @tap="$manyCk(saveData)">提交</button>
+						<button :disabled="isClick" class="cu-btn bg-green shadow-blur round lg" style="width: 40%;" @tap="$manyCk(saveData)">提交入库</button>
 					</view>
 				</view>
 			</scroll-view>
@@ -164,6 +164,7 @@ export default {
 			listTouchDirection: null,
 			deptList: [],
 			cuIList: [],
+			boxList: [],
 			startDate: null,
 			endDate: null
 		};
@@ -185,45 +186,6 @@ export default {
 			this.endDate = option.endDate;
 			this.source = option.tranType;
 			this.billNo = option.billNo;
-			basic
-				.getOrderList({
-					billNo: option.billNo,
-					/* startDate: option.startDate,
-					 	endDate: option.endDate, */
-					tranType: option.tranType,
-					type: option.type
-				})
-				.then(res => {
-					if (res.success) {
-						let data = res.data.list;
-						for (let i in data) {
-							me.cuIList.push({
-								Fdate: data[i].Fdate,
-								FBillNo: data[i].FBillNo,
-								number: data[i].FItemNumber,
-								name: data[i].FItemName,
-								model: data[i].FModel,
-								Fauxprice: data[i].Fauxprice,
-								Famount: data[i].Famount,
-								FBatchManager: data[i].FBatchManager,
-								fsourceEntryID: data[i].fsourceEntryID,
-								fsourceTranType: data[i].FTranType,
-								FAuxStockQty: data[i].FAuxStockQty,
-								Fauxqty: data[i].Fauxqty,
-								fsourceBillNo: data[i].FBillNo,
-								unitID: data[i].FUnitNumber,
-								unitName: data[i].FUnitName,
-								quantity: data[i].Fauxqty
-							});
-						}
-					}
-				})
-				.catch(err => {
-					uni.showToast({
-						icon: 'none',
-						title: err.msg
-					});
-				});
 		}
 	},
 	onReady: function() {
@@ -280,6 +242,7 @@ export default {
 						title: err.msg
 					});
 				});
+
 			basic
 				.getDeptList({})
 				.then(res => {
@@ -293,8 +256,84 @@ export default {
 						title: err.msg
 					});
 				});
+			me.getPickingList();
 			me.loadModal = false;
 			me.isClick = false;
+		},
+		getPickingList() {
+			production
+				.custInStockTemBoxList({ pageNum: 1, pageSize: 250 })
+				.then(res => {
+					if (res.success) {
+						me.boxList = res.data;
+					}
+				})
+				.catch(err => {
+					uni.showToast({
+						icon: 'none',
+						title: err.msg
+					});
+				});
+		},
+		packingData() {
+			let that = this;
+			if (that.finBillNo == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描单号'
+				});
+			}
+			if (that.finBillNo == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描产品'
+				});
+			}
+			if (that.finBillNo == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描装箱码'
+				});
+			}
+			that.isClick = true;
+			let portData = {};
+			let list = this.boxList;
+			let array = [];
+			list.forEach(item => {
+				let obj = {};
+				obj.fseq = item.fseq;
+				obj.fitemcode = item.fitemcode;
+				obj.fboxcode = item.fboxcode;
+				obj.fpackcode = item.fpackcode;
+				obj.status = item.status;
+				array.push(obj);
+			});
+			portData.custInStockTemBoxes = array;
+			portData.fdate = 2;
+			portData.fbillno = this.form.fbillno;
+			portData.fdeptnumber = this.form.fdeptnumber;
+			portData.fitemnumber = this.form.fitemnumber;
+			portData.fworkno = this.form.finBillNo;
+			production
+				.insert()
+				.then(res => {
+					if (res.success) {
+						that.boxList = [];
+						uni.showToast({
+							icon: 'success',
+							title: res.msg
+						});
+					} else {
+						that.isClick = false;
+					}
+				})
+				.catch(err => {
+					uni.showToast({
+						icon: 'none',
+						title: err.msg
+					});
+					that.isClick = false;
+				});
 		},
 		saveData() {
 			this.isClick = true;
@@ -398,11 +437,26 @@ export default {
 		del(index, item) {
 			this.cuIList.splice(index, 1);
 		},
+		delBox(index, item) {
+			production
+				.custInStockTemBoxDelete({ fid: item.fid })
+				.then(res => {
+					if (res.success) {
+						this.getPickingList();
+					}
+				})
+				.catch(err => {
+					uni.showToast({
+						icon: 'none',
+						title: err.msg
+					});
+				});
+		},
 		showModal(e) {
 			/* this.fabClick(); */
 			this.scanChoice = null;
 			this.scanChoice = e.currentTarget.dataset.target;
-			this.modalName = "Modal";
+			this.modalName = 'Modal';
 		},
 		hideModal(e) {
 			this.modalName = null;
@@ -452,24 +506,25 @@ export default {
 		getScanInfo(res) {
 			var that = this;
 			let number = 0;
-			switch(that.scanChoice){
+			switch (that.scanChoice) {
 				case '1':
-				that.scanResult = res;
-				that.hideModal();
-				break;
+					that.scanResult = res;
+					that.hideModal();
+					break;
 				case '2':
-				that.scanResult = res;
-				that.hideModal();
-				break;
+					that.scanResult = res;
+					that.cuIList.push({});
+					that.hideModal();
+					break;
 				case '3':
-				that.scanResult = res;
-				that.hideModal();
-				break;
+					that.scanResult = res;
+					that.hideModal();
+					break;
 				default:
-				uni.showToast({
-					icon: 'none',
-					title: '请点击扫描按钮，再调用扫描'
-				});
+					uni.showToast({
+						icon: 'none',
+						title: '请点击扫描按钮，再调用扫描'
+					});
 			}
 			/* basic
 				.inventoryByBarcode({ uuid: res })

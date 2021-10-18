@@ -18,5 +18,33 @@ export default {
             },
 			data: params
         });
-    }
+    },
+	//装箱
+	insert(params) {
+        return Request().post('/custInStockTem/insert', {
+            header: {
+				contentType: 'application/json',
+				accept: '*/*'
+            },
+			data: params
+        });
+    },
+	//装箱列表
+	custInStockTemBoxList(page) {
+        return Request().post('/custInStockTemBox/list/'+page.pageNum+'/'+page.pageSize, {
+            header: {
+				contentType: 'application/json',
+				accept: '*/*'
+            },
+        });
+    },//装箱删除
+	custInStockTemBoxDelete(params,page) {
+        return Request().post('/custInStockTemBox/delete', {
+            header: {
+				contentType: 'application/json',
+				accept: '*/*'
+            },
+			data: params
+        });
+    },
 };

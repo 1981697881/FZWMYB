@@ -31,14 +31,11 @@ export default {
     },
 	//装箱列表
 	custInStockTemBoxList(page) {
-        return Request().post('/custInStockTemBox/list/'+page.pageNum+'/'+page.pageSize, {
-            header: {
-				contentType: 'application/json',
-				accept: '*/*'
-            },
-        });
+		return Request().get('/custInStockTemBox/list/'+page.pageNum+'/'+page.pageSize, {
+		    
+		});
     },//装箱删除
-	custInStockTemBoxDelete(params,page) {
+	custInStockTemBoxDelete(params) {
         return Request().post('/custInStockTemBox/delete', {
             header: {
 				contentType: 'application/json',

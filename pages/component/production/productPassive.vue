@@ -5,7 +5,7 @@
 			<block slot="backText">返回</block>
 			<block slot="content">产品入库</block>
 		</cu-custom>
-		<uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable :direction="direction" @fabClick="fabClick"></uni-fab>
+		<!-- <uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable :direction="direction" @fabClick="fabClick"></uni-fab> -->
 		<view class="box getheight">
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
@@ -110,8 +110,8 @@
 						@touchend="ListTouchEnd"
 						:data-target="'move-box-' + index"
 					>
-						<view style="clear: both;width: 100%;">
-							<view style="clear: both;width: 100%;" class="grid text-center col-2" @tap="showModal2(index, item)" data-target="Modal" data-number="item.number">
+						<view style="clear: both;width: 100%;"><!-- @tap="showModal2(index, item)" -->
+							<view style="clear: both;width: 100%;" class="grid text-center col-2"  data-target="Modal" data-number="item.number">
 								<view class="text-grey">序号:{{ (item.index = index + 1) }}</view>
 								<view class="text-grey">编码:{{ item.number }}</view>
 								<view class="text-grey">名称:{{ item.name }}</view>
@@ -206,8 +206,16 @@ export default {
 			endDate: null
 		};
 	},
+	onUnload() {
+		// 移除监听事件
+		uni.$off('scancodedate');
+	},
 	onLoad: function(option) {
 		let me = this;
+		uni.$on('scancodedate', function(data) {
+			// _this 这里面的方法用这个 _this.code(data.code)
+			me.getScanInfo(data.code);
+		});
 		if (JSON.stringify(option) != '{}') {
 			this.isOrder = true;
 			me.form.fdeptID = option.FDeptNumber;
@@ -724,7 +732,77 @@ export default {
 						});
 				}
 			});
-		}, // ListTouch触摸开始
+		},
+		 getScanInfo(res) {
+		 	var that = this;
+		 		let number = 0;
+		 		let resData = res.split(',')
+		 	if (that.isOrder) {
+		 		for (let i in that.cuIList) {
+		 			let codeData = that.cuIList[i]['FBarCode'].split(',')
+		 			if ((resData[0]+resData[1]+resData[2]+resData[3]+resData[4]) == (codeData[0]+codeData[1]+codeData[2]+codeData[3]+codeData[4])) {
+		 				if (that.cuIList[i]['onFBarCode'] == '') {
+		 					that.cuIList[i]['onFBarCode'] = (resData[0]+resData[1]+resData[2]+resData[3]+resData[4])
+		 					that.cuIList[i]['FAuxStockQty'] = resData[3]
+		 				}else{
+		 					uni.showToast({
+		 						icon: 'none',
+		 						title: '该条码已扫描！'
+		 					});
+		 					break;
+		 				}
+		 			}  else {
+		 				number ++;
+		 			}
+		 		}
+		 		if(number == that.cuIList.length){
+		 			uni.showToast({
+		 				icon: 'none',
+		 				title: '该物料不在所选单据中！'
+		 			});
+		 		}
+		 	}else{
+				for (let i in that.cuIList) {
+					let codeData = that.cuIList[i]['FBarCode'].split(',')
+					if ((resData[0]+resData[1]+resData[2]+resData[3]+resData[4]) == (codeData[0]+codeData[1]+codeData[2]+codeData[3]+codeData[4])) {
+						if (that.cuIList[i]['onFBarCode'] == '') {
+							that.cuIList[i]['onFBarCode'] = (resData[0]+resData[1]+resData[2]+resData[3]+resData[4])
+							that.cuIList[i]['FAuxStockQty'] = resData[3]
+						}else{
+							uni.showToast({
+								icon: 'none',
+								title: '该条码已扫描！'
+							});
+							break;
+						}
+					} else {
+					  	number ++;
+					  }
+				}
+				if(number == that.cuIList.length){
+					that.cuIList.push({
+						Fdate: resData[0],
+						FBillNo: resData[0],
+						number: resData[0],
+						name: resData[0],
+						model: resData[0],
+						Fauxprice: resData[0],
+						Famount: resData[0],
+						FBatchManager: resData[0], 
+						fsourceEntryID: resData[0],
+						fsourceTranType: resData[0],
+						FAuxStockQty: resData[0],
+						Fauxqty: resData[0],
+						fsourceBillNo: resData[0],
+						unitID: resData[0],
+						unitName: resData[0],
+						quantity: resData[0]
+					});
+				}
+			}
+		 },
+		 
+		 // ListTouch触摸开始
 		ListTouchStart(e) {
 			this.listTouchStart = e.touches[0].pageX;
 		},

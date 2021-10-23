@@ -13,9 +13,9 @@
 				</view>
 				<view class="action">
 					生产单号:
-					<text>{{ form.finBillNo }}</text>
+					<text>{{ form.fworkno }}</text>
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="1"><text class="cuIcon-scan"></text></button>
+				<button :disabled="!isOrder" class="cu-btn round line-orange shadow" @tap="showModal" data-target="1"><text class="cuIcon-scan"></text></button>
 			</view>
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
@@ -30,12 +30,12 @@
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
 					<view class="title">产品:</view>
-					<input name="input" style="font-size: 13px;text-align: left;" v-model="form.fnote" />
+					<input name="input" style="font-size: 13px;text-align: left;" v-model="form.fitemnumber" />
 				</view>
 				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="2"><text class="cuIcon-scan"></text></button>
 			</view>
 		</view>
-		<scroll-view scroll-x class="bg-white nav text-center margin-top" :style="[{ top: CustomBar + 'px' }]">
+		<scroll-view scroll-x class="item-tab bg-white nav text-center margin-top" :style="[{ top: CustomBar + 'px' }]">
 			<view class="cu-item" :class="index == TabCur ? 'text-blue cur' : ''" v-for="(item, index) in tabNav" :key="index" @tap="tabSelect" :data-id="index">
 				{{ tabNav[index] }}
 			</view>
@@ -44,7 +44,7 @@
 			<view class="cu-bar bg-white solid-bottom">
 				<view class="action">
 					<text class="cuIcon-title text-blue"></text>
-					装箱码:
+					装箱码:{{ form.fpackcode }}
 				</view>
 				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="3"><text class="cuIcon-scan"></text></button>
 			</view>
@@ -62,8 +62,8 @@
 						>
 							<view style="clear: both;width: 100%;">
 								<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
-									<view class="text-grey">机身码:{{ (item.index = index + 1) }}</view>
-									<view class="text-grey">产品码:{{ item.number }}</view>
+									<view class="text-grey">机身码:{{ item.fitemcode }}</view>
+									<view class="text-grey">产品码:{{ item.fboxcode }}</view>
 								</view>
 							</view>
 							<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
@@ -78,6 +78,13 @@
 			</scroll-view>
 		</block>
 		<block v-if="TabCur == 1">
+			<view class="cu-bar bg-white solid-bottom">
+				<view class="action">
+					<text class="cuIcon-title text-blue"></text>
+					仓库:
+					<ld-select :list="stockList" list-key="FName" value-key="FNumber" placeholder="请选择" clearable v-model="form.fdCStockId" @change="stockChange"></ld-select>
+				</view>
+			</view>
 			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 				<view v-for="(item, index) in boxList" :key="index">
 					<view class="cu-list menu-avatar">
@@ -91,10 +98,10 @@
 							:data-target="'move-box-' + index"
 						>
 							<view style="clear: both;width: 100%;">
-								<view style="clear: both;width: 100%;" class="grid text-center col-3" data-target="Modal" data-number="item.number">
-									<view class="text-grey">机身码:{{ (item.index = index + 1) }}</view>
-									<view class="text-grey">产品码:{{ item.number }}</view>
-									<view class="text-grey">包装码:{{ item.name }}</view>
+								<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
+									<view class="text-grey">机身码:{{ item.fitemcode }}</view>
+									<view class="text-grey">产品码:{{ item.fboxcode }}</view>
+									<view class="text-grey">包装码:{{ item.fpackcode }}</view>
 								</view>
 							</view>
 							<view class="move"><view class="bg-red" @tap="delBox(index, item)">删除</view></view>
@@ -151,18 +158,23 @@ export default {
 			modalName2: null,
 			scanChoice: null,
 			gridCol: 3,
+			counter: 0,
+			counterIndex: 0,
 			form: {
 				finBillNo: null,
 				fdate: '',
-				fnote: '',
+				fworkno: null,
+				fitemnumber: '',
 				fbillerID: null,
-				fdeptID: ''
+				fdeptID: '',
+				fdCStockId: ''
 			},
 			borrowItem: {},
 			skin: false,
 			listTouchStart: 0,
 			listTouchDirection: null,
 			deptList: [],
+			stockList: [],
 			cuIList: [],
 			boxList: [],
 			startDate: null,
@@ -200,8 +212,10 @@ export default {
 						// res - 各种参数
 						let info = uni.createSelectorQuery().select('.getheight');
 						let customHead = uni.createSelectorQuery().select('.customHead');
+						let itemTab = uni.createSelectorQuery().select('.item-tab');
 						var infoHeight = 0;
 						var headHeight = 0;
+						var itemTabHeight = 0;
 						info.boundingClientRect(function(data) {
 							//data - 各种参数
 							infoHeight = data.height;
@@ -212,8 +226,14 @@ export default {
 								headHeight = data.height;
 							})
 							.exec();
+						itemTab
+							.boundingClientRect(function(data) {
+								//data - 各种参数
+								itemTabHeight = data.height;
+							})
+							.exec();
 						setTimeout(function() {
-							me.pageHeight = res.windowHeight - infoHeight - headHeight;
+							me.pageHeight = res.windowHeight - infoHeight - headHeight - itemTabHeight - 60;
 						}, 1000);
 					}
 				});
@@ -225,6 +245,7 @@ export default {
 		tabSelect(e) {
 			this.TabCur = e.currentTarget.dataset.id;
 			this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60;
+			this.isClick = false;
 		},
 		initMain() {
 			const me = this;
@@ -256,16 +277,30 @@ export default {
 						title: err.msg
 					});
 				});
+			basic
+				.getStockList({})
+				.then(res => {
+					if (res.success) {
+						me.stockList = res.data;
+					}
+				})
+				.catch(err => {
+					uni.showToast({
+						icon: 'none',
+						title: err.msg
+					});
+				});
 			me.getPickingList();
 			me.loadModal = false;
 			me.isClick = false;
 		},
 		getPickingList() {
+			let that = this;
 			production
 				.custInStockTemBoxList({ pageNum: 1, pageSize: 250 })
 				.then(res => {
 					if (res.success) {
-						me.boxList = res.data;
+						that.boxList = res.data;
 					}
 				})
 				.catch(err => {
@@ -277,48 +312,59 @@ export default {
 		},
 		packingData() {
 			let that = this;
-			if (that.finBillNo == null) {
+			if (that.isOrder && that.form.fworkno == null) {
 				return uni.showToast({
 					icon: 'none',
 					title: '请扫描单号'
 				});
 			}
-			if (that.finBillNo == null) {
+			if (that.form.fitemnumber == null) {
 				return uni.showToast({
 					icon: 'none',
 					title: '请扫描产品'
 				});
 			}
-			if (that.finBillNo == null) {
+			if (that.form.fdeptID == '') {
+				return uni.showToast({
+					icon: 'none',
+					title: '请选择部门'
+				});
+			}
+			if (that.form.fpackcode == null) {
 				return uni.showToast({
 					icon: 'none',
 					title: '请扫描装箱码'
 				});
 			}
+			if (that.cuIList.length == 0 || that.counterIndex == 1) {
+				return uni.showToast({
+					icon: 'none',
+					title: '装箱列表为空或数据不全'
+				});
+			}
 			that.isClick = true;
 			let portData = {};
-			let list = this.boxList;
+			let list = this.cuIList;
 			let array = [];
-			list.forEach(item => {
+			list.forEach((item, index) => {
 				let obj = {};
-				obj.fseq = item.fseq;
+				obj.fseq = index + 1;
 				obj.fitemcode = item.fitemcode;
 				obj.fboxcode = item.fboxcode;
-				obj.fpackcode = item.fpackcode;
-				obj.status = item.status;
+				obj.fpackcode = that.form.fpackcode;
 				array.push(obj);
 			});
 			portData.custInStockTemBoxes = array;
-			portData.fdate = 2;
+			portData.fdate = that.form.fdate;
 			portData.fbillno = this.form.fbillno;
-			portData.fdeptnumber = this.form.fdeptnumber;
+			portData.fdeptnumber = this.form.fdeptID;
 			portData.fitemnumber = this.form.fitemnumber;
-			portData.fworkno = this.form.finBillNo;
+			portData.fworkno = this.form.fworkno;
 			production
-				.insert()
+				.insert(portData)
 				.then(res => {
 					if (res.success) {
-						that.boxList = [];
+						that.cuIList = [];
 						uni.showToast({
 							icon: 'success',
 							title: res.msg
@@ -339,48 +385,59 @@ export default {
 			this.isClick = true;
 			let portData = {};
 			let result = [];
-			let list = this.cuIList;
+			let list = this.boxList;
 			let array = [];
-			let isBatchNo = false;
-			let batchMsg = '';
-			let me = this;
+			let that = this;
+			if (that.isOrder && that.form.fworkno == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描单号'
+				});
+			}
+			if (that.form.fitemnumber == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描产品'
+				});
+			}
+			if (that.form.fdCStockId == '') {
+				return uni.showToast({
+					icon: 'none',
+					title: '请选择仓库'
+				});
+			}
+			if (that.form.fdeptID == '') {
+				return uni.showToast({
+					icon: 'none',
+					title: '请选择部门'
+				});
+			}
+			if (that.form.fpackcode == null) {
+				return uni.showToast({
+					icon: 'none',
+					title: '请扫描装箱码'
+				});
+			}
+			if (that.cuIList.length == 0) {
+				return uni.showToast({
+					icon: 'none',
+					title: '装箱列表为空'
+				});
+			}
 			for (let i in list) {
 				let obj = {};
-				obj.fauxqty = list[i].quantity;
+				obj.fauxqty = 1;
 				obj.fentryId = list[i].index;
-				obj.finBillNo = this.form.finBillNo;
-				obj.fitemId = list[i].number;
-				if (list[i].FBatchManager) {
-					if (list[i].fbatchNo != '' && list[i].fbatchNo != null) {
-						obj.fbatchNo = list[i].fbatchNo;
-						isBatchNo = true;
-					} else {
-						isBatchNo = false;
-						batchMsg = '批号已启用，不允许为空';
-						break;
-					}
-				} else {
-					if (list[i].fbatchNo == '' || list[i].fbatchNo == null) {
-						obj.fbatchNo = list[i].fbatchNo;
-						isBatchNo = true;
-					} else {
-						isBatchNo = false;
-						batchMsg = '批号未启用，不允许输入';
-						break;
-					}
-				}
-				obj.fauxprice = list[i].Fauxprice != null && typeof list[i].Fauxprice != 'undefined' ? list[i].Fauxprice : 0;
-				obj.famount = list[i].Famount != null && typeof list[i].Famount != 'undefined' ? list[i].Famount : 0;
-				obj.fdCSPId = list[i].positions;
-				obj.uuid = list[i].uuid;
-				obj.fdCStockId = list[i].stockId;
+				obj.finBillNo = that.form.finBillNo;
+				obj.fitemId = list[i].fitemcode;
+				obj.fpackcode = list[i].fpackcode;
+				obj.fdCStockId = that.form.fdCStockId;
 				if (list[i].stockId == null || typeof list[i].stockId == 'undefined') {
 					result.push(list[i].index);
 				}
-				obj.fsourceBillNo = list[i].fsourceBillNo == null || list[i].fsourceBillNo == 'undefined' ? '' : list[i].fsourceBillNo;
-				obj.fsourceEntryID = list[i].fsourceEntryID == null || list[i].fsourceEntryID == 'undefined' ? '' : list[i].fsourceEntryID;
-				obj.fsourceTranType = list[i].fsourceTranType == null || list[i].fsourceTranType == 'undefined' ? '' : list[i].fsourceTranType;
-				obj.funitId = list[i].unitID;
+				obj.fsourceBillNo = that.form.fworkno == null || that.form.fworkno == 'undefined' ? '' : that.form.fworkno;
+				/* obj.fsourceEntryID = list[i].fsourceEntryID == null || list[i].fsourceEntryID == 'undefined' ? '' : list[i].fsourceEntryID;
+				obj.fsourceTranType = list[i].fsourceTranType == null || list[i].fsourceTranType == 'undefined' ? '' : list[i].fsourceTranType; */
 				array.push(obj);
 			}
 			portData.items = array;
@@ -390,59 +447,50 @@ export default {
 			portData.fbillerID = this.form.fbillerID;
 			portData.fdeptId = this.form.fdeptID;
 			console.log(JSON.stringify(portData));
-			if (result.length == 0) {
-				if (isBatchNo) {
-					production
-						.productStockIn(portData)
-						.then(res => {
-							if (res.success) {
-								this.cuIList = [];
-								uni.showToast({
-									icon: 'success',
-									title: res.msg
-								});
-								this.initMain();
-								if (this.isOrder) {
-									setTimeout(function() {
-										uni.$emit('handleBack', { startDate: me.startDate, endDate: me.endDate, source: me.source });
-										uni.navigateBack({
-											url: '../production/productActive'
-										});
-									}, 1000);
-								}
-							}
-						})
-						.catch(err => {
-							uni.showToast({
-								icon: 'none',
-								title: err.msg
-							});
-							this.isClick = false;
+			production
+				.productStockIn(portData)
+				.then(res => {
+					if (res.success) {
+						this.boxList = [];
+						uni.showToast({
+							icon: 'success',
+							title: res.msg
 						});
-				} else {
+						this.initMain();
+						if (this.isOrder) {
+							setTimeout(function() {
+								uni.$emit('handleBack', { startDate: that.startDate, endDate: that.endDate, source: that.source });
+								uni.navigateBack({
+									url: '../production/productActive'
+								});
+							}, 1000);
+						}
+					}
+				})
+				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: batchMsg
+						title: err.msg
 					});
 					this.isClick = false;
-				}
-			} else {
-				uni.showToast({
-					icon: 'none',
-					title: '仓库不允许为空'
 				});
-				this.isClick = false;
-			}
 		},
 		del(index, item) {
 			this.cuIList.splice(index, 1);
+			this.counter--;
+			that.counterIndex = 0;
 		},
 		delBox(index, item) {
+			let that = this;
 			production
 				.custInStockTemBoxDelete({ fid: item.fid })
 				.then(res => {
 					if (res.success) {
-						this.getPickingList();
+						uni.showToast({
+							icon: 'success',
+							title: res.msg
+						});
+						that.getPickingList();
 					}
 				})
 				.catch(err => {
@@ -491,6 +539,9 @@ export default {
 		deptChange(val) {
 			this.form.fdeptID = val;
 		},
+		stockChange(val) {
+			this.form.fdCStockId = val;
+		},
 		bindChange(e) {
 			this.form.fdate = e;
 		},
@@ -509,82 +560,44 @@ export default {
 			switch (that.scanChoice) {
 				case '1':
 					that.scanResult = res;
+					that.form.fworkno = res;
 					that.hideModal();
 					break;
 				case '2':
 					that.scanResult = res;
-					that.cuIList.push({});
+					that.form.fitemnumber = res;
 					that.hideModal();
 					break;
 				case '3':
 					that.scanResult = res;
+					that.form.fpackcode = res;
 					that.hideModal();
 					break;
 				default:
-					uni.showToast({
-						icon: 'none',
-						title: '请点击扫描按钮，再调用扫描'
-					});
-			}
-			/* basic
-				.inventoryByBarcode({ uuid: res })
-				.then(reso => {
-					console.log(reso);
-					if (reso.success) {
-						let data = reso.data;
-						for (let i in that.cuIList) {
-							console.log(data[0]['FItemID'] == that.cuIList[i]['FItemID']);
-							console.log(data[0]['FItemID'] + ',' + that.cuIList[i]['FItemID']);
-							if (data[0]['FItemID'] == that.cuIList[i]['FItemID']) {
-								number++;
-								uni.showToast({
-									icon: 'none',
-									title: '该物料已存在'
-								});
-								break;
+					let counter = that.counterIndex == 0 ? 'fitemcode' : 'fboxcode';
+					if (typeof that.cuIList[this.counter] == 'undefined') {
+						that.cuIList.push({
+							fitemcode: res,
+							fboxcode: ''
+						});
+						that.counterIndex++;
+					} else {
+						if (that.cuIList[this.counter]['fitemcode'] == res) {
+							that.cuIList[this.counter][counter] = res;
+							if (that.counterIndex == 0) {
+								that.counterIndex++;
+							} else {
+								this.counter++;
+								that.counterIndex = 0;
 							}
-						}
-						if (number == 0) {
-							data[0].number = data[0].FNumber;
-							data[0].name = data[0].FName;
-							data[0].unitName = data[0].FUnitName;
-							data[0].model = data[0].FModel;
-							for (var i = 0; i < data.length; i++) {
-								data[i].number = data[i].FNumber;
-								data[i].name = data[i].FName;
-								data[i].unitName = data[i].FUnitName;
-								data[i].model = data[i].FModel;
-								data[i].quantity = 0;
-								data[i].checked = false;
-								data[i].stockName = data[i].FStockName;
-								data[i].stockId = data[i].FStockNumber;
-								data[i].FIsStockMgr = data[i].FIsStockMgr;
-								data[i].fbatchNo = data[i].FBatchNo;
-								data[i].unitID = data[i].FUnitID;
-							}
-							that.cuIList.push({
-								number: data[0].FNumber,
-								name: data[0].FName,
-								FItemID: data[0].FItemID,
-								checked: false,
-								isLoading: false,
-								FCounty: 0,
-								unitName: data[0].FUnitName,
-								model: data[0].FModel,
-								childrenList: data
+						} else {
+							uni.showToast({
+								icon: 'none',
+								title: '机身码和产品码不一致，请确认'
 							});
-							console.log(data);
-							that.form.bNum = that.cuIList.length;
 						}
-						console.log(that.cuIList);
 					}
-				})
-				.catch(err => {
-					uni.showToast({
-						icon: 'none',
-						title: err.msg
-					});
-				}); */
+			}
 		},
 		// ListTouch触摸开始
 		ListTouchStart(e) {

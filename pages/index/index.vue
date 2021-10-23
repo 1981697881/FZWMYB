@@ -15,7 +15,7 @@ export default {
 	components: { scanCode },
 	data() {
 		return {
-			PageCur: 'component',
+			PageCur: 'component', 
 			totalSize: 0,
 			baifen: 0
 		};

@@ -5,6 +5,7 @@
 			<block slot="content">销售出库</block>
 		</cu-custom>
 		<loading :loadModal="loadModal"></loading>
+		<!-- <uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable :direction="direction" @fabClick="fabClick"></uni-fab> -->
 		<view class="box getheight">
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
@@ -33,6 +34,13 @@
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
 					<view class="title">客户:{{ form.FCustName }}</view>
+					<!-- <ld-select :list="customerList"
+				list-key="FName" value-key="FNumber"
+				placeholder="请选择"
+				clearable
+				
+				:value="form.FCustNumber"
+				@change="customerChange"></ld-select> -->
 				</view>
 				<button class="cu-btn round lines-blue line-blue shadow" @tap="showModal" :disabled="isDis" data-target="Modal">选择</button>
 			</view>
@@ -171,9 +179,9 @@ export default {
 				.then(res => {
 					if (res.success) {
 						let data = res.data.list;
-						console.log(data)
+						console.log(data);
 						for (let i in data) {
-							me.dataList.push({
+							me.cuIList.push({
 								Fdate: data[i].Fdate,
 								number: data[i].FItemNumber,
 								name: data[i].FItemName,
@@ -181,11 +189,10 @@ export default {
 								FBatchManager: data[i].FBatchManager,
 								fsourceBillNo: data[i].FBillNo,
 								Famount: data[i].Famount,
-								onFBarCode: [],
 								FOrderEntryID: data[i].FOrderEntryID,
 								ForderID: data[i].ForderID,
 								FPrdBillNo: data[i].FPrdBillNo,
-								FBarCode: data[i].FBarCode,
+								FBarCode: '',
 								Fauxprice: data[i].Fauxprice,
 								fsourceEntryId: data[i].FEntryID,
 								fsourceTranType: data[i].FTranType,
@@ -388,32 +395,32 @@ export default {
 			if (result.length == 0) {
 				if (portData.fcustId != '' && typeof portData.fcustId != 'undefined') {
 					/* if (isBatchNo) { */
-						sales
-							.saleStockOut(portData)
-							.then(res => {
-								console.log(res)
-								if (res.success) {
-									this.cuIList = [];
-									uni.showToast({
-										icon: 'success',
-										title: res.msg
-									});
-									this.form.bNum = 0;
-									this.initMain();
-									if (this.isOrder) {
-										uni.navigateBack({
-											url: '../sales/salesActive?startDate=' + this.startDate + '&endDate=' + this.endDate
-										});
-									}
-								}
-							})
-							.catch(err => {
+					sales
+						.saleStockOut(portData)
+						.then(res => {
+							console.log(res);
+							if (res.success) {
+								this.cuIList = [];
 								uni.showToast({
-									icon: 'none',
-									title: err.msg
+									icon: 'success',
+									title: res.msg
 								});
-								this.isClick = false;
+								this.form.bNum = 0;
+								this.initMain();
+								if (this.isOrder) {
+									uni.navigateBack({
+										url: '../sales/salesActive?startDate=' + this.startDate + '&endDate=' + this.endDate
+									});
+								}
+							}
+						})
+						.catch(err => {
+							uni.showToast({
+								icon: 'none',
+								title: err.msg
 							});
+							this.isClick = false;
+						});
 					/* } else {
 						uni.showToast({
 							icon: 'none',
@@ -507,86 +514,113 @@ export default {
 				}
 			});
 		},
-		getScanInfo(res) {
+		addList(data, num, barcode, type) {
 			var that = this;
-			let number = 0;
 			if (that.isOrder) {
-				let resData = res.split(',')
-				for (let i in that.dataList) {
+				let number = 0;
+				for (let i in that.cuIList) {
 					//判断是否属于单据物料
-					if(resData[0] == that.dataList[i]['FPrdBillNo'] && resData[7] == that.dataList[i]['number']&& resData[8] == that.dataList[i]['model']){
+					if (data.FNumber == that.cuIList[i]['number']) {
 						//判断已插入表数据，长度为0 则不用检验条码是否重复
-						if(that.cuIList.length>0){
-							console.log(that.dataList[i]['onFBarCode'].indexOf(res))
-							if (that.dataList[i]['onFBarCode'].indexOf(res) ==-1) {
-								that.cuIList.push({
-									Fdate: that.dataList[i].Fdate,
-									number: that.dataList[i].number,
-									name: that.dataList[i].name,
-									model: that.dataList[i].model,
-									FBatchManager: that.dataList[i].FBatchManager,
-									fsourceBillNo: that.dataList[i].fsourceBillNo,
-									Famount: that.dataList[i].Famount,
-									onFBarCode: res,
-									FBarCode: res,
-									bNum: resData[3],
-									FOrderEntryID: that.dataList[i].FOrderEntryID,
-									ForderID: that.dataList[i].ForderID,
-									FPrdBillNo: that.dataList[i].FPrdBillNo,
-									FBarCode: that.dataList[i].FBarCode,
-									Fauxprice: that.dataList[i].Fauxprice,
-									fsourceEntryId: that.dataList[i].fsourceEntryId,
-									fsourceTranType: that.dataList[i].fsourceTranType,
-									quantity: resData[2],
-									unitID: that.dataList[i].unitID,
-									unitName: that.dataList[i].unitName
-								});
-								that.dataList[i]['onFBarCode'].push(res)
-								that.form.bNum += parseFloat(resData[3]);
-							}else{
-								uni.showToast({
-									icon: 'none',
-									title: '该条码已扫描！'
-								});
-								break;
-							}
-						}else{
-							that.cuIList.push({
-								Fdate: that.dataList[i].Fdate,
-								number: that.dataList[i].number,
-								name: that.dataList[i].name,
-								model: that.dataList[i].model,
-								FBatchManager: that.dataList[i].FBatchManager,
-								fsourceBillNo: that.dataList[i].fsourceBillNo,
-								Famount: that.dataList[i].Famount,
-								onFBarCode: res,
-								FBarCode: res,
-								bNum: resData[3],
-								FOrderEntryID: that.dataList[i].FOrderEntryID,
-								ForderID: that.dataList[i].ForderID,
-								FPrdBillNo: that.dataList[i].FPrdBillNo,
-								FBarCode: that.dataList[i].FBarCode,
-								Fauxprice: that.dataList[i].Fauxprice,
-								fsourceEntryId: that.dataList[i].fsourceEntryId,
-								fsourceTranType: that.dataList[i].fsourceTranType,
-								quantity: resData[2],
-								unitID: that.dataList[i].unitID,
-								unitName: that.dataList[i].unitName
+						if (that.cuIList[i]['FBarCode'] == '') {
+							that.cuIList[i]['bNum'] = 1;
+							that.cuIList[i]['quantity'] = num;
+							that.cuIList[i]['FBarCode'] = barcode;
+							that.form.bNum += 1;
+							break;
+						} else if(that.cuIList[i]['FBarCode'] == barcode){
+							uni.showToast({
+								icon: 'none',
+								title: '该条码已扫描！'
 							});
-							that.dataList[i]['onFBarCode'].push(res)
-							that.form.bNum += parseFloat(resData[3]);
+							break;
+						} else{
+							that.cuIList.push({
+								number: data.FNumber,
+								name: data.FName,
+								model: data.FModel,
+								fpackcode: type == 0 ? data[0] : null,
+								barcode: type == 1 ? data[0] : null,
+								bNum: 1,
+								FBarCode: barcode,
+								quantity: num,
+								unitID: data.FUnitID,
+								unitName: data.FUnitName
+							});
+							that.form.bNum += 1;
+							break;
 						}
-						
 					} else {
-						number ++;
+						number++;
 					}
 				}
-				if(number == that.cuIList.length){
+				if (number == that.cuIList.length) {
 					uni.showToast({
 						icon: 'none',
 						title: '该物料不在所选单据中！'
 					});
 				}
+			} else {
+				let number = 0;
+				for (let i in that.cuIList) {
+					//判断是否属于单据物料
+					if (barcode == that.cuIList[i]['FBarCode']) {
+						uni.showToast({
+							icon: 'none',
+							title: '该条码已扫描！'
+						});
+						number++;
+					} 
+				}
+				// 判断列表是否存在
+				if (number == 0) {
+					that.cuIList.push({
+						number: data.FNumber,
+						name: data.FName,
+						model: data.FModel,
+						fpackcode: type == 0 ? data[0] : null,
+						barcode: type == 1 ? data[0] : null,
+						bNum: 1,
+						FBarCode: barcode,
+						quantity: num,
+						unitID: data.FUnitID,
+						unitName: data.FUnitName
+					});
+					that.form.bNum += 1;
+				}
+			}
+		},
+		getScanInfo(res) {
+			var that = this;
+			let resData = res.split(';');
+			if (resData.length > 1) {
+				basic
+					.barcodeScan({ uuid: resData[0] })
+					.then(reso => {
+						if (reso.success) {
+							that.addList(reso.data[0], resData[5], res, 0);
+						}
+					})
+					.catch(err => {
+						uni.showToast({
+							icon: 'none',
+							title: err.msg
+						});
+					});
+			} else {
+				basic
+					.barcodeScan({ uuid: resData[0] })
+					.then(reso => {
+						if (reso.success) {
+							that.addList(reso.data[0], 1, res, 1);
+						}
+					})
+					.catch(err => {
+						uni.showToast({
+							icon: 'none',
+							title: err.msg
+						});
+					});
 			}
 		}
 	}

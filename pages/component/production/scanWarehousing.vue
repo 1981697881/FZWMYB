@@ -352,6 +352,7 @@ export default {
 				obj.fitemcode = item.fitemcode;
 				obj.fboxcode = item.fboxcode;
 				obj.fpackcode = that.form.fpackcode;
+				obj.fbarcode = item.fbarcode;
 				array.push(obj);
 			});
 			portData.custInStockTemBoxes = array;
@@ -369,6 +370,7 @@ export default {
 							icon: 'success',
 							title: res.msg
 						});
+						that.getPickingList();
 					} else {
 						that.isClick = false;
 					}
@@ -382,7 +384,6 @@ export default {
 				});
 		},
 		saveData() {
-			this.isClick = true;
 			let portData = {};
 			let result = [];
 			let list = this.boxList;
@@ -392,12 +393,6 @@ export default {
 				return uni.showToast({
 					icon: 'none',
 					title: '请扫描单号'
-				});
-			}
-			if (that.form.fitemnumber == null) {
-				return uni.showToast({
-					icon: 'none',
-					title: '请扫描产品'
 				});
 			}
 			if (that.form.fdCStockId == '') {
@@ -412,24 +407,20 @@ export default {
 					title: '请选择部门'
 				});
 			}
-			if (that.form.fpackcode == null) {
-				return uni.showToast({
-					icon: 'none',
-					title: '请扫描装箱码'
-				});
-			}
-			if (that.cuIList.length == 0) {
+			if (list.length == 0) {
 				return uni.showToast({
 					icon: 'none',
 					title: '装箱列表为空'
 				});
 			}
+			this.isClick = true;
 			for (let i in list) {
 				let obj = {};
 				obj.fauxqty = 1;
 				obj.fentryId = list[i].index;
 				obj.finBillNo = that.form.finBillNo;
-				obj.fitemId = list[i].fitemcode;
+				obj.fitemId = list[i].fitemnumber;
+				obj.fbarcode = list[i].fbarcode;
 				obj.fpackcode = list[i].fpackcode;
 				obj.fdCStockId = that.form.fdCStockId;
 				if (list[i].stockId == null || typeof list[i].stockId == 'undefined') {
@@ -446,7 +437,7 @@ export default {
 			portData.fdate = this.form.fdate;
 			portData.fbillerID = this.form.fbillerID;
 			portData.fdeptId = this.form.fdeptID;
-			console.log(JSON.stringify(portData));
+			console.log(JSON.stringify(portData))
 			production
 				.productStockIn(portData)
 				.then(res => {
@@ -477,8 +468,8 @@ export default {
 		},
 		del(index, item) {
 			this.cuIList.splice(index, 1);
-			this.counter--;
-			that.counterIndex = 0;
+			/* this.counter--; */
+			this.counterIndex = 0;
 		},
 		delBox(index, item) {
 			let that = this;
@@ -574,28 +565,49 @@ export default {
 					that.hideModal();
 					break;
 				default:
-					let counter = that.counterIndex == 0 ? 'fitemcode' : 'fboxcode';
-					if (typeof that.cuIList[this.counter] == 'undefined') {
-						that.cuIList.push({
-							fitemcode: res,
-							fboxcode: ''
-						});
-						that.counterIndex++;
-					} else {
-						if (that.cuIList[this.counter]['fitemcode'] == res) {
-							that.cuIList[this.counter][counter] = res;
-							if (that.counterIndex == 0) {
-								that.counterIndex++;
-							} else {
-								this.counter++;
-								that.counterIndex = 0;
-							}
-						} else {
-							uni.showToast({
-								icon: 'none',
-								title: '机身码和产品码不一致，请确认'
-							});
+					for (let i in that.cuIList) {
+						let codeData = that.cuIList[i]['fbarcode'];
+						if (res == codeData) {
+							number++;
 						}
+					}
+					if (number == 0) {
+						let counter = that.counterIndex == 0 ? 'fitemcode' : 'fboxcode';
+						if(that.cuIList.length == 0){
+							that.cuIList.push({
+								fitemcode: res,
+								fboxcode: ''
+							});
+							that.counterIndex++;
+						}else{
+							if(that.counterIndex == 0){
+								that.cuIList.push({
+									fitemcode: res,
+									fboxcode: ''
+								});
+								that.counterIndex++;
+							}else{
+								if (that.cuIList[that.cuIList.length-1]['fitemcode'] == res) {
+									that.cuIList[that.cuIList.length-1][counter] = res;
+									that.cuIList[that.cuIList.length-1]["fbarcode"] = res;
+									if (that.counterIndex == 0) {
+										that.counterIndex++;
+									} else {
+										that.counterIndex = 0;
+									}
+								} else {
+									uni.showToast({
+										icon: 'none',
+										title: '机身码和产品码不一致，请确认'
+									});
+								}
+							}
+						}
+					} else {
+						uni.showToast({
+							icon: 'none',
+							title: '该条码已扫描！'
+						});
 					}
 			}
 		},

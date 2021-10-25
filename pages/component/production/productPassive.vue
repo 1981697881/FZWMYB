@@ -777,7 +777,7 @@ export default {
 						}
 					} else {
 					  	number ++;
-					  }
+					}
 				}
 				if(number == that.cuIList.length){
 					that.cuIList.push({

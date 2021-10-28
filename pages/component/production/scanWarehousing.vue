@@ -101,7 +101,7 @@
 								<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
 									<view class="text-grey">机身码:{{ item.fitemcode }}</view>
 									<view class="text-grey">产品码:{{ item.fboxcode }}</view>
-									<view class="text-grey">包装码:{{ item.fpackcode }}</view>
+									<view style="width: 100%;" class="text-grey">包装码:{{ item.fpackcode }}</view>
 								</view>
 							</view>
 							<view class="move"><view class="bg-red" @tap="delBox(index, item)">删除</view></view>

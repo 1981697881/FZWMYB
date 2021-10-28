@@ -72,18 +72,39 @@
 		<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 			<view v-for="(item, index) in cuIList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 220upx;" :data-target="'move-box-' + index">
-						<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
-							<view class="text-grey">序号:{{ (item.index = index + 1) }}</view>
-							<view class="text-grey">编码:{{ item.number }}</view>
-							<view class="text-grey">名称:{{ item.name }}</view>
-							<view class="text-grey">数量:{{ item.quantity }}</view>
-							<view class="text-grey">批号:{{ item.fbatchNo }}</view>
-							<view class="text-grey">单位:{{ item.unitName }}</view>
-							<view class="text-grey">规格:{{ item.model }}</view>
-							<view class="text-grey"></view>
-							<view class="text-grey">{{ item.stockName }}</view>
+					<view
+						class="cu-item"
+						style="width: 100%;margin-top: 2px;height: 320upx;"
+						:class="modalName == 'move-box-' + index ? 'move-cur' : ''"
+						@touchstart="ListTouchStart"
+						@touchmove="ListTouchMove"
+						@touchend="ListTouchEnd"
+						:data-target="'move-box-' + index"
+					>
+						<view style="clear: both;width: 100%;">
+							<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
+								<view class="text-grey">序号:{{ (item.index = index + 1) }}</view>
+								<view class="text-grey">编码:{{ item.number }}</view>
+								<view class="text-grey">名称:{{ item.name }}</view>
+								<view class="text-grey">数量:{{ item.quantity }}</view>
+								<view class="text-grey">批号:{{ item.fbatchNo }}</view>
+								<view class="text-grey">单位:{{ item.unitName }}</view>
+								<view class="text-grey">规格:{{ item.model }}</view>
+								<view class="text-grey"></view>
+								<view class="text-grey">{{ item.stockName }}</view>
+								<view class="text-grey">
+									<picker @change="PickerChange($event, item)" :value="pickerVal" :range-key="'FName'" :range="stockList">
+										<view class="picker">
+											<button class="cu-btn sm round bg-green shadow">
+												<text class="cuIcon-homefill"></text>
+												仓库
+											</button>
+										</view>
+									</picker>
+								</view>
+							</view>
 						</view>
+						<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
 					</view>
 				</view>
 			</view>
@@ -369,6 +390,8 @@ export default {
 				if (list[i].quantity == null || list[i].quantity == 0 || typeof list[i].quantity == '') {
 					result.push(list[i].index);
 				}
+				obj.fbarcode = list[i].fbarcode == null || list[i].fbarcode == 'undefined' ? '' : list[i].fbarcode;
+				obj.fpackcode = list[i].fpackcode == null || list[i].fpackcode == 'undefined' ? '' : list[i].fpackcode;
 				obj.fsourceBillNo = list[i].fsourceBillNo == null || list[i].fsourceBillNo == 'undefined' ? '' : list[i].fsourceBillNo;
 				obj.fsourceEntryId = list[i].fsourceEntryId == null || list[i].fsourceEntryId == 'undefined' ? '' : list[i].fsourceEntryId;
 				obj.fsourceTranType = list[i].fsourceTranType == null || list[i].fsourceTranType == 'undefined' ? '' : list[i].fsourceTranType;
@@ -391,7 +414,7 @@ export default {
 				this.isClick = false;
 				return;
 			}
-			/* console.log(JSON.stringify(portData)) */
+			console.log(JSON.stringify(portData));
 			if (result.length == 0) {
 				if (portData.fcustId != '' && typeof portData.fcustId != 'undefined') {
 					/* if (isBatchNo) { */
@@ -528,19 +551,19 @@ export default {
 							that.cuIList[i]['FBarCode'] = barcode;
 							that.form.bNum += 1;
 							break;
-						} else if(that.cuIList[i]['FBarCode'] == barcode){
+						} else if (that.cuIList[i]['FBarCode'] == barcode) {
 							uni.showToast({
 								icon: 'none',
 								title: '该条码已扫描！'
 							});
 							break;
-						} else{
+						} else {
 							that.cuIList.push({
 								number: data.FNumber,
 								name: data.FName,
 								model: data.FModel,
-								fpackcode: type == 0 ? data[0] : null,
-								barcode: type == 1 ? data[0] : null,
+								fpackcode: type == 0 ? barcode : null,
+								fbarcode: type == 1 ? barcode : null,
 								bNum: 1,
 								FBarCode: barcode,
 								quantity: num,
@@ -570,7 +593,7 @@ export default {
 							title: '该条码已扫描！'
 						});
 						number++;
-					} 
+					}
 				}
 				// 判断列表是否存在
 				if (number == 0) {
@@ -578,8 +601,8 @@ export default {
 						number: data.FNumber,
 						name: data.FName,
 						model: data.FModel,
-						fpackcode: type == 0 ? data[0] : null,
-						barcode: type == 1 ? data[0] : null,
+						fpackcode: type == 0 ? barcode : null,
+						fbarcode: type == 1 ? barcode : null,
 						bNum: 1,
 						FBarCode: barcode,
 						quantity: num,
@@ -594,19 +617,18 @@ export default {
 			var that = this;
 			let resData = res.split(';');
 			if (resData.length > 1) {
-				basic
-					.barcodeScan({ uuid: resData[0] })
-					.then(reso => {
-						if (reso.success) {
-							that.addList(reso.data[0], resData[5], res, 0);
-						}
-					})
-					.catch(err => {
-						uni.showToast({
-							icon: 'none',
-							title: err.msg
-						});
-					});
+				that.addList(
+					{
+						FNumber: resData[6],
+						FName: resData[2],
+						FModel: resData[1],
+						unitID: '',
+						unitName: ''
+					},
+					resData[5],
+					res,
+					0
+				);
 			} else {
 				basic
 					.barcodeScan({ uuid: resData[0] })
@@ -622,6 +644,25 @@ export default {
 						});
 					});
 			}
+		},
+		// ListTouch触摸开始
+		ListTouchStart(e) {
+			this.listTouchStart = e.touches[0].pageX;
+		},
+
+		// ListTouch计算方向
+		ListTouchMove(e) {
+			this.listTouchDirection = e.touches[0].pageX - this.listTouchStart > 0 ? 'right' : 'left';
+		},
+
+		// ListTouch计算滚动
+		ListTouchEnd(e) {
+			if (this.listTouchDirection == 'left') {
+				this.modalName = e.currentTarget.dataset.target;
+			} else {
+				this.modalName = null;
+			}
+			this.listTouchDirection = null;
 		}
 	}
 };

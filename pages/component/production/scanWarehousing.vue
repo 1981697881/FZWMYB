@@ -15,15 +15,15 @@
 					生产单号:
 					<text>{{ form.fworkno }}</text>
 				</view>
-				<button :disabled="!isOrder" class="cu-btn round line-orange shadow" @tap="showModal" data-target="1"><text class="cuIcon-scan"></text></button>
+				<button :disabled="!isOrder" class="cu-btn round line-orange shadow" @tap="showModal('1')"><text class="cuIcon-scan"></text></button>
 			</view>
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
-				<view class="action">
-					<view style="width: 40px;">部门:</view>
+				<view class="action" style="width: 50%;">
+					<view style="width: 180rpx;">部门:</view>
 					<ld-select :list="deptList" list-key="FName" value-key="FNumber" placeholder="请选择" clearable v-model="form.fdeptID" @change="deptChange"></ld-select>
-				</view>
-				<view class="action">
-					<view style="width: 90px;">日期:</view>
+				</view> 
+				<view class="action" style="width: 50%;">
+					<view style="width: 180rpx;">日期:</view>
 					<ruiDatePicker fields="day" class="ruidata" start="2010-00-00" end="2030-12-30" :value="form.fdate" @change="bindChange"></ruiDatePicker>
 				</view>
 			</view>
@@ -32,7 +32,7 @@
 					<view class="title">产品:</view>
 					<input name="input" style="font-size: 13px;text-align: left;" v-model="form.fitemnumber" />
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="2"><text class="cuIcon-scan"></text></button>
+				<!-- <button class="cu-btn round line-orange shadow" @tap="showModal('2')"><text class="cuIcon-scan"></text></button> -->
 			</view>
 		</view>
 		<scroll-view scroll-x class="item-tab bg-white nav text-center margin-top" :style="[{ top: CustomBar + 'px' }]">
@@ -41,12 +41,12 @@
 			</view>
 		</scroll-view>
 		<block v-if="TabCur == 0">
-			<view class="cu-bar bg-white solid-bottom">
+			<view class="cu-bar bg-white solid-bottom" >
 				<view class="action">
 					<text class="cuIcon-title text-blue"></text>
-					装箱码:{{ form.fpackcode }}
+					<text style="width: 600rpx;display: inline-block;  word-break:break-all;">装箱码:{{ form.fpackcode }}</text>
 				</view>
-				<button class="cu-btn round line-orange shadow" @tap="showModal" data-target="3"><text class="cuIcon-scan"></text></button>
+				<button class="cu-btn round line-orange shadow" @tap="showModal('3')"><text class="cuIcon-scan"></text></button>
 			</view>
 			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 				<view v-for="(item, index) in cuIList" :key="index">
@@ -101,7 +101,7 @@
 								<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal" data-number="item.number">
 									<view class="text-grey">机身码:{{ item.fitemcode }}</view>
 									<view class="text-grey">产品码:{{ item.fboxcode }}</view>
-									<view style="width: 100%;" class="text-grey">包装码:{{ item.fpackcode }}</view>
+									<view style="width: 100%;word-break:break-all;" class="text-grey">包装码:{{ item.fpackcode }}</view>
 								</view>
 							</view>
 							<view class="move"><view class="bg-red" @tap="delBox(index, item)">删除</view></view>
@@ -156,7 +156,7 @@ export default {
 			pickerVal: null,
 			modalName: null,
 			modalName2: null,
-			scanChoice: null,
+			scanChoice: 0,
 			gridCol: 3,
 			counter: 0,
 			counterIndex: 0,
@@ -318,12 +318,12 @@ export default {
 					title: '请扫描单号'
 				});
 			}
-			if (that.form.fitemnumber == null) {
+			/* if (that.form.fitemnumber == null) {
 				return uni.showToast({
 					icon: 'none',
 					title: '请扫描产品'
 				});
-			}
+			} */
 			if (that.form.fdeptID == '') {
 				return uni.showToast({
 					icon: 'none',
@@ -371,6 +371,7 @@ export default {
 							title: res.msg
 						});
 						that.getPickingList();
+						that.isClick = false;
 					} else {
 						that.isClick = false;
 					}
@@ -400,7 +401,7 @@ export default {
 					icon: 'none',
 					title: '请选择仓库'
 				});
-			}
+			} 
 			if (that.form.fdeptID == '') {
 				return uni.showToast({
 					icon: 'none',
@@ -437,11 +438,11 @@ export default {
 			portData.fdate = this.form.fdate;
 			portData.fbillerID = this.form.fbillerID;
 			portData.fdeptId = this.form.fdeptID;
-			console.log(JSON.stringify(portData))
 			production
 				.productStockIn(portData)
 				.then(res => {
 					if (res.success) {
+						this.isClick = false;
 						this.boxList = [];
 						uni.showToast({
 							icon: 'success',
@@ -491,15 +492,15 @@ export default {
 					});
 				});
 		},
-		showModal(e) {
+		showModal(val) {
 			/* this.fabClick(); */
-			this.scanChoice = null;
-			this.scanChoice = e.currentTarget.dataset.target;
+			this.scanChoice = 0;
+			this.scanChoice = val;
 			this.modalName = 'Modal';
 		},
 		hideModal(e) {
 			this.modalName = null;
-			this.scanChoice = null;
+			this.scanChoice = 0;
 		},
 		// 查询前后三天日期
 		getDay(date, day) {
@@ -562,6 +563,7 @@ export default {
 				case '3':
 					that.scanResult = res;
 					that.form.fpackcode = res;
+					that.form.fitemnumber = res.split(';')[5];
 					that.hideModal();
 					break;
 				default:
@@ -574,22 +576,22 @@ export default {
 					if (number == 0) {
 						let counter = that.counterIndex == 0 ? 'fitemcode' : 'fboxcode';
 						if(that.cuIList.length == 0){
-							that.cuIList.push({
+							that.cuIList.unshift({
 								fitemcode: res,
 								fboxcode: ''
 							});
 							that.counterIndex++;
 						}else{
 							if(that.counterIndex == 0){
-								that.cuIList.push({
+								that.cuIList.unshift({
 									fitemcode: res,
 									fboxcode: ''
 								});
 								that.counterIndex++;
 							}else{
-								if (that.cuIList[that.cuIList.length-1]['fitemcode'] == res) {
-									that.cuIList[that.cuIList.length-1][counter] = res;
-									that.cuIList[that.cuIList.length-1]["fbarcode"] = res;
+								if (that.cuIList[0]['fitemcode'] == res) {
+									that.cuIList[0][counter] = res;
+									that.cuIList[0]["fbarcode"] = res;
 									if (that.counterIndex == 0) {
 										that.counterIndex++;
 									} else {

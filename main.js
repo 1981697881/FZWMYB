@@ -15,7 +15,7 @@ global.$http = Request();
 Vue.prototype.$store = store
 Vue.prototype.$manyCk = manyCk
 Vue.config.productionTip = false
-
+ 
 App.mpType = 'app'
 
 const app = new Vue({

@@ -489,9 +489,6 @@ export default {
 					});
 				});
 			}	
-			
-			
-			
 		},
 		_chooseOne(i1, i2) {
 			if (this.cuIList[i1].childrenList[i2].checked) {

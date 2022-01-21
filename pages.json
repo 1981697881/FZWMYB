@@ -70,6 +70,9 @@
 		{
 			"path": "pages/component/production/scanWarehousing",
 			"style": {}
+		},{
+			"path": "pages/component/production/packingQuery",
+			"style": {}
 		},
 		{
 			"path": "pages/component/production/productPassive",

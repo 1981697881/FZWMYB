@@ -19,6 +19,15 @@ export default {
 			data: params
         });
     },
+	//装箱查询
+	checkBarCode(params) {
+        return Request().post('/api/basic/checkBarCode', {
+            header: {
+				accept: '*/*'
+            },
+			data: params
+        });
+    },
 	//装箱
 	insert(params) {
         return Request().post('/custInStockTem/insert', {

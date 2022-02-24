@@ -5,7 +5,7 @@
 			<block slot="backText">返回</block>
 			<block slot="content">产品入库</block>
 		</cu-custom>
-		<!-- <uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable :direction="direction" @fabClick="fabClick"></uni-fab> -->
+		<uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable :direction="direction" @fabClick="fabClick"></uni-fab>
 		<view class="box getheight">
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
@@ -638,7 +638,8 @@ export default {
 			var that = this;
 			uni.scanCode({
 				success: function(res) {
-					basic
+					that.getScanInfo(res.result)
+					/* basic
 						.barcodeScan({ uuid: res.result })
 						.then(reso => {
 							if (reso.success) {
@@ -688,7 +689,7 @@ export default {
 										title: '该物料不在所选单据中！',
 									});
 								} */
-								} else {
+								/*} else {
 									let number = 0;
 									for (let i in that.cuIList) {
 										if (
@@ -729,8 +730,8 @@ export default {
 								icon: 'none',
 								title: err.msg
 							});
-						});
-				}
+						});*/
+				} 
 			});
 		},
 		 getScanInfo(res) {

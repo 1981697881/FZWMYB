@@ -95,16 +95,18 @@
 			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 				<view v-for="(item, index) in boxList" :key="index">
 					<view class="cu-list menu-avatar">
-						<view class="cu-item" style="width: 100%;margin-top: 2px;height: 120upx;"
+						<view class="cu-item" style="width: 100%;margin-top: 2px;padding:15rpx 0 15rpx 0;height: auto;"
 							:class="modalName == 'move-box-' + index ? 'move-cur' : ''" @touchstart="ListTouchStart"
 							@touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index">
 							<view style="clear: both;width: 100%;">
 								<view style="clear: both;width: 100%;" class="grid text-center col-2"
 									data-target="Modal" data-number="item.number">
-									<view class="text-grey">机身码:{{ item.fitemcode }}</view>
-									<view class="text-grey">产品码:{{ item.fboxcode }}</view>
 									<view style="width: 100%;word-break:break-all;" class="text-grey">
-										包装码:{{ item.fpackcode }}</view>
+										包装码:{{ item[0].fpackcode }}</view>
+									<block v-for="(itemt, indext) in boxList[index]" :key="indext">
+										<view class="text-grey">{{ indext+1 }}:机身码:{{ itemt.fitemcode }}</view>
+										<view class="text-grey">产品码:{{ itemt.fboxcode }}</view>
+									</block>
 								</view>
 							</view>
 							<view class="move">
@@ -295,7 +297,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					}); */
 
@@ -309,7 +311,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				basic
@@ -322,7 +324,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				me.getPickingList();
@@ -338,14 +340,33 @@
 					})
 					.then(res => {
 						if (res.success) {
-							console.log(res.data)
-							that.boxList = res.data;
+							let array = []
+							let result = []
+							let itemArr = []
+							res.data.forEach((item, index) => {
+								if (result.indexOf(item.fpackcode) == -1) {
+									result.push(item.fpackcode)
+									if (index != 0) {
+										array.push(itemArr)
+									}
+									itemArr = []
+									itemArr.push(item)
+								} else {
+									itemArr.push(item)
+								}
+								if(res.data.length == index+1){
+									array.push(itemArr)
+								}
+
+							}) 
+							console.log(array)
+							that.boxList = array;
 						}
 					})
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},
@@ -419,7 +440,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 						that.isClick = false;
 					});
@@ -434,7 +455,7 @@
 					.getBillNo({
 						TranType: 2
 					})
-					.then(res => {
+					.then(reso => {
 						if (reso.success) {
 							that.form.finBillNo = reso.data;
 							if (that.isOrder && that.form.fworkno == null) {
@@ -463,22 +484,24 @@
 							}
 							this.isClick = true;
 							for (let i in list) {
-								let obj = {};
-								obj.fauxqty = 1;
-								obj.fentryId = list[i].index;
-								obj.finBillNo = that.form.finBillNo;
-								obj.fitemId = list[i].fitemnumber;
-								obj.fbarcode = list[i].fbarcode;
-								obj.fpackcode = list[i].fpackcode;
-								obj.fdCStockId = that.form.fdCStockId;
-								if (list[i].stockId == null || typeof list[i].stockId == 'undefined') {
-									result.push(list[i].index);
-								}
-								obj.fsourceBillNo = that.form.fworkno == null || that.form.fworkno == 'undefined' ?
-									'' : that.form.fworkno;
-								/* obj.fsourceEntryID = list[i].fsourceEntryID == null || list[i].fsourceEntryID == 'undefined' ? '' : list[i].fsourceEntryID;
-								obj.fsourceTranType = list[i].fsourceTranType == null || list[i].fsourceTranType == 'undefined' ? '' : list[i].fsourceTranType; */
-								array.push(obj);
+								list[i].forEach((item)=>{
+									let obj = {};
+									obj.fauxqty = 1;
+									obj.fentryId = item.index;
+									obj.finBillNo = that.form.finBillNo;
+									obj.fitemId = item.fitemnumber;
+									obj.fbarcode = item.fbarcode;
+									obj.fpackcode = item.fpackcode;
+									obj.fdCStockId = that.form.fdCStockId;
+									if (item.stockId == null || typeof item.stockId == 'undefined') {
+										result.push(item.index);
+									}
+									obj.fsourceBillNo = that.form.fworkno == null || that.form.fworkno == 'undefined' ?
+										'' : that.form.fworkno;
+									/* obj.fsourceEntryID = list[i].fsourceEntryID == null || list[i].fsourceEntryID == 'undefined' ? '' : list[i].fsourceEntryID;
+									obj.fsourceTranType = list[i].fsourceTranType == null || list[i].fsourceTranType == 'undefined' ? '' : list[i].fsourceTranType; */
+									array.push(obj);
+								})
 							}
 							portData.items = array;
 							portData.ftranType = 2;
@@ -515,7 +538,7 @@
 								.catch(err => {
 									uni.showToast({
 										icon: 'none',
-										title: err.msg
+										title: err.message
 									});
 									that.isClick = false;
 								});
@@ -524,7 +547,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 
@@ -536,9 +559,13 @@
 			},
 			delBox(index, item) {
 				let that = this;
+				let ids = []
+				item.forEach((item)=>{
+					ids.push(item.fid)
+				})
 				production
 					.custInStockTemBoxDelete({
-						fid: item.fid
+						fids: ids
 					})
 					.then(res => {
 						if (res.success) {
@@ -552,7 +579,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},
@@ -657,7 +684,7 @@
 							.catch(err => {
 								uni.showToast({
 									icon: 'none',
-									title: err.msg
+									title: err.message
 								});
 							});
 
@@ -695,7 +722,7 @@
 									.catch(err => {
 										uni.showToast({
 											icon: 'none',
-											title: err.msg
+											title: err.message
 										});
 									});
 							} else {
@@ -723,7 +750,7 @@
 										.catch(err => {
 											uni.showToast({
 												icon: 'none',
-												title: err.msg
+												title: err.message
 											});
 										});
 								} else {

@@ -38,7 +38,7 @@
 	<scroll-view scroll-y class="page" :style="{'height': pageHeight + 'px' }">
 		<view v-for="(item,index) in cuIconList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 200upx;" >
+					<view class="cu-item" style="width: 100%;margin-top: 2px;padding:15rpx 0 15rpx 0;height: auto;" >
 						<view style="clear: both; width: 100%;" class="grid text-left col-2" @tap="$manyCk(showList(index, item))" data-target="Modal" data-number="item.number">
 							<view class="text-grey">日期:{{item.Fdate}}</view>
 							<view class="text-grey">单号:{{item.FBillNo}}</view>
@@ -174,7 +174,7 @@
 				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg
+						title: err.message
 					});
 				});
 		},
@@ -198,7 +198,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},

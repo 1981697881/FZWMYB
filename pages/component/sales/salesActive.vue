@@ -31,7 +31,7 @@
 		<scroll-view scroll-y class="page" :style="{ 'height': pageHeight + 'px' }">
 			<view v-for="(item,index) in cuIconList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 260upx;">
+					<view class="cu-item" style="width: 100%;margin-top: 2px;padding:15rpx 0 15rpx 0;height: auto;">
 						<view style="clear: both;width: 100%;" class="grid text-left col-2"
 							@tap="$manyCk(showList(index, item))" data-target="Modal" data-number="item.number">
 							<view class="text-grey">日期:{{item.Fdate}}</view>
@@ -81,7 +81,18 @@
 				cuIconList: [],
 			};
 		},
+		onHide() {
+			// 移除监听事件
+			uni.$off('scancodedate');
+		},
 		onShow: function(option) {
+			_self = this;
+			uni.$on('scancodedate', function(data) {
+				// _this 这里面的方法用这个 _this.code(data.code)
+				let resData = data.code.split(';');
+				_self.keyword = resData[2]
+				_self.getNewsList();
+			});
 			uni.$on("handleBack", res => {
 				this.start = res.startDate
 				this.end = res.endDate
@@ -93,7 +104,6 @@
 		},
 		onLoad: function(option) {
 			// 列表数据默认加载
-			_self = this;
 			if (JSON.stringify(option) != "{}") {
 				this.start = this.getDay('', -3).date
 				this.end = this.getDay('', 0).date
@@ -175,7 +185,7 @@
 				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg
+						title: err.message
 					});
 				});
 		},
@@ -199,12 +209,20 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},
 			showList(index, item) {
-				uni.showActionSheet({
+				uni.navigateTo({
+					//url: '../sales/salesPassive?Fdate='+item.Fdate+'&FBillNo='+item.FBillNo+'&FNumber='+item.FItemNumber+'&FItemName='+item.FItemName+'&FModel='+item.FModel+'&Fauxqty='+item.Fauxqty+'&fsourceBillNo='+item.FBillNo+'&fsourceEntryID='+item.FSourceEntryID+'&fsourceTranType='+item.FTranType+'&unitNumber='+item.FUnitNumber+'&FCustName='+item.FCustName+'&FUnitName='+item.FUnitName+'&FCustNumber='+item.FCustNumber+'&Famount='+item.Famount+'&Fauxprice='+item.Fauxprice+'&FDeptNumber='+item.FDeptNumber+'&Fauxqty='+item.Fauxqty,
+					url: '../sales/salesPassive?billNo=' + item.FBillNo +
+						'&tranType=' + this.source + '&type=2&startDate=' + this
+						.start + '&endDate=' + this.end + '&FDeptNumber=' + item
+						.FDeptNumber + '&FCustNumber=' + item.FCustNumber +
+						'&FCustName=' + item.FCustName
+				});
+				/* uni.showActionSheet({
 					itemList: ['拣货', '出库', '退货'],
 					success: function(res) {
 						switch (res.tapIndex) {
@@ -239,7 +257,7 @@
 					fail: function(res) {
 						console.log(res.errMsg);
 					}
-				});
+				}); */
 
 			},
 			fetchData(val = '') {
@@ -283,7 +301,7 @@
 			},
 			inputChange(e) {
 				this.keyword = e.detail.value
-				this.fetchData(e.detail.value)
+				this.getNewsList()
 			},
 			compareDate(date1, date2) {
 				var oDate1 = new Date(date1);

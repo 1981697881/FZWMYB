@@ -300,7 +300,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				});
 				basic.getDeptList({}).then(res => {
@@ -310,7 +310,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				});
 				basic.getStockList({}).then(res => {
@@ -320,7 +320,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				})
 				basic.customerList({}).then(res => {
@@ -330,7 +330,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				})
 				me.loadModal = false
@@ -407,7 +407,7 @@
 					}).catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg,
+							title: err.message,
 						});
 						this.isClick = false
 					})
@@ -596,7 +596,7 @@
 					}).catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg,
+							title: err.message,
 						});
 					})
 					

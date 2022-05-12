@@ -18,7 +18,7 @@
 		<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 			<view v-for="(item, index) in cuIconList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 320upx;">
+					<view class="cu-item" style="width: 100%;margin-top: 2px;padding:15rpx 0 15rpx 0;height: auto;">
 						<view style="clear: both;width: 100%;" class="grid text-left col-2" data-target="Modal" data-number="item.number">
 							<view class="text-grey">序号:{{ (item.index = index + 1) }}</view>
 							<view class="text-grey">产品编码:{{ item.FNumber }}</view>
@@ -171,7 +171,7 @@ export default {
 				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg
+						title: err.message
 					});
 				});
 		}
@@ -196,7 +196,7 @@ export default {
 				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg
+						title: err.message
 					});
 				});
 		},
@@ -236,7 +236,7 @@ export default {
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				that.resultA.push(res.result);

@@ -183,7 +183,7 @@ import ruiDatePicker from '@/components/rattenking-dtpicker/rattenking-dtpicker.
 				.catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg
+						title: err.message
 					});
 				});
 		},
@@ -209,7 +209,7 @@ import ruiDatePicker from '@/components/rattenking-dtpicker/rattenking-dtpicker.
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},

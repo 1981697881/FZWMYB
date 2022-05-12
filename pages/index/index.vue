@@ -50,7 +50,7 @@ export default {
 							.catch(err => {
 								uni.showToast({
 									icon: 'none',
-									title: err.msg
+									title: err.message
 								});
 								return uni.reLaunch({
 									url: '../login/login'

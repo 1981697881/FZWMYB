@@ -229,7 +229,7 @@
 					 }).catch(err => {
 					 	uni.showToast({
 					 		icon: 'none',
-					 		title: err.msg,
+					 		title: err.message,
 					 	});
 					 })
 				 }
@@ -308,7 +308,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				});
 				basic.getEmpList({}).then(res => {
@@ -318,7 +318,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				});
 				me.loadModal = false
@@ -398,7 +398,7 @@
 					}).catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg,
+							title: err.message,
 						});
 						this.isClick = false
 					})

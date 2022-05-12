@@ -5,8 +5,8 @@
 			<block slot="content">销售出库</block>
 		</cu-custom>
 		<loading :loadModal="loadModal"></loading>
-		<uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable
-			:direction="direction" @fabClick="fabClick"></uni-fab>
+		<!-- <uni-fab :pattern="pattern" :horizontal="horizontal" :vertical="vertical" :popMenu="popMenu" distable
+			:direction="direction" @fabClick="fabClick"></uni-fab> -->
 		<view class="box getheight">
 			<view class="cu-bar bg-white solid-bottom" style="height: 60upx;">
 				<view class="action">
@@ -222,18 +222,18 @@
 									Fauxprice: data[i].Fauxprice,
 									fsourceEntryId: data[i].FEntryID,
 									fsourceTranType: data[i].FTranType,
-									quantity: data[i].Fauxqty,
+									quantity: 0,/* data[i].Fauxqty */
 									unitID: data[i].FUnitNumber,
 									unitName: data[i].FUnitName
 								});
 							}
-							/* me.form.bNum = res.data.list.length; */
+							me.form.bNum = res.data.list.length;
 						}
 					})
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			}
@@ -268,7 +268,7 @@
 								})
 								.exec();
 							setTimeout(function() {
-								me.pageHeight = res.windowHeight - infoHeight - headHeight;
+								me.pageHeight = res.windowHeight - infoHeight - headHeight - 30;
 							}, 1000);
 						}
 					});
@@ -313,7 +313,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					}); */
 				basic
@@ -326,7 +326,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				basic
@@ -339,7 +339,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				basic
@@ -352,7 +352,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 				me.isClick = false;
@@ -370,9 +370,9 @@
 					.getBillNo({
 						TranType: 21
 					})
-					.then(res => {
+					.then(reso => {
 						if (reso.success) {
-							that.form.finBillNo = that.data;
+							that.form.finBillNo = reso.data;
 							for (let i in list) {
 								let obj = {};
 								obj.fauxqty = list[i].quantity;
@@ -402,9 +402,9 @@
 								obj.famount = list[i].Famount != null && typeof list[i].Famount != 'undefined' ? list[
 									i].Famount : 0;
 								obj.fdCStockId = list[i].stockId;
-								/* if (list[i].stockId == null || typeof list[i].stockId == 'undefined') {
+								if (list[i].stockId == null || typeof list[i].stockId == 'undefined') {
 									result.push(list[i].index);
-								} */
+								}
 								if (list[i].quantity == null || list[i].quantity == 0 || typeof list[i].quantity ==
 									'') {
 									result.push(list[i].index);
@@ -458,11 +458,13 @@
 												that.form.bNum = 0;
 												that.initMain();
 												if (that.isOrder) {
-													uni.navigateBack({
-														url: '../sales/salesActive?startDate=' + that
-															.startDate +
-															'&endDate=' + that.endDate
-													});
+													setTimeout(function() {
+														uni.navigateBack({
+															url: '../sales/salesActive?startDate=' + that
+																.startDate +
+																'&endDate=' + that.endDate
+														});
+													}, 1000);
 												}
 											}
 										})
@@ -490,7 +492,7 @@
 							} else {
 								uni.showToast({
 									icon: 'none',
-									title: '物料实发数量不允许为空'
+									title: '物料实发数量和仓库不允许为空'
 								});
 								that.isClick = false;
 							}
@@ -499,7 +501,7 @@
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
 			},
@@ -586,7 +588,7 @@
 								that.cuIList[i]['bNum'] = 1;
 								that.cuIList[i]['quantity'] = num;
 								that.cuIList[i]['FBarCode'] = barcode;
-								that.form.bNum += 1;
+								that.form.bNum = that.cuIList.length;
 								break;
 							} else if (that.cuIList[i]['FBarCode'] == barcode) {
 								uni.showToast({
@@ -607,7 +609,7 @@
 									unitID: data.FUnitID,
 									unitName: data.FUnitName
 								});
-								that.form.bNum += 1;
+								that.form.bNum = that.cuIList.length;
 								break;
 							}
 						} else {
@@ -653,12 +655,13 @@
 			getScanInfo(res) {
 				var that = this;
 				let resData = res.split(';');
-				/*if (resData.length > 1) {
+				if (resData.length > 1) {
 					that.addList(
 						{
-							FNumber: resData[2],
+							FNumber: resData[5],
 							FName: resData[1],
 							FModel: resData[0],
+							billNo: resData[2],
 							unitID: '',
 							unitName: ''
 						},
@@ -666,7 +669,7 @@
 						res,
 						0
 					);
-				} else { */
+				} else {
 				basic
 					.barcodeScan({
 						uuid: res
@@ -674,21 +677,28 @@
 					.then(reso => {
 						if (reso.success) {
 							console.log(reso)
-							if (resData.length > 1) {
-								that.addList(reso.data[0], resData[4], res, 1);
-							} else {
-								that.addList(reso.data[0], 1, res, 1);
+							if(reso.data>0){
+								if (resData.length > 1) {
+									that.addList(reso.data[0], resData[4], res, 1);
+								} else {
+									that.addList(reso.data[0], 1, res, 1);
+								}
+							}else{
+								uni.showToast({
+									icon: 'none',
+									title: "查不到条码信息"
+								});
 							}
-
+							
 						}
 					})
 					.catch(err => {
 						uni.showToast({
 							icon: 'none',
-							title: err.msg
+							title: err.message
 						});
 					});
-				/* } */
+				}
 			},
 			// ListTouch触摸开始
 			ListTouchStart(e) {

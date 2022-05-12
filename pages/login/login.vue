@@ -149,7 +149,7 @@
 				 	}).catch(err => {
 				 		uni.showToast({
 				 			icon: 'none',
-				 			title: err.msg,
+				 			title: err.message,
 				 		});
 				 	})
 				 }else{
@@ -222,7 +222,7 @@
 				}).catch(err => {
 					uni.showToast({
 						icon: 'none',
-						title: err.msg,
+						title: err.message,
 					});
 				})
 				}else{

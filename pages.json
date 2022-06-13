@@ -88,6 +88,16 @@
 		{
 			"path": "pages/component/sales/salesPassive",
 			"style": {}
+		},{
+			"path": "pages/component/sales/affirmActive",
+			"style": {
+				"navigationBarTitleText": "uni-app",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/component/sales/affirmPassive",
+			"style": {}
 		},
 		{
 			"path": "pages/component/sales/pickingPassive",

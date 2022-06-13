@@ -677,7 +677,7 @@
 					.then(reso => {
 						if (reso.success) {
 							console.log(reso)
-							if(reso.data>0){
+							if(reso.data.length>0){
 								if (resData.length > 1) {
 									that.addList(reso.data[0], resData[4], res, 1);
 								} else {

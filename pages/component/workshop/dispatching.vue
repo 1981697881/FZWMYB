@@ -38,7 +38,7 @@
 	<scroll-view scroll-y class="page" :style="{ 'height': pageHeight + 'px' }">
 		<view v-for="(item,index) in cuIconList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 220upx;" >
+					<view class="cu-item" style="width: 100%;margin-top: 2px;height: auto;" >
 						<view style="clear: both;width: 100%;" class="grid text-left col-2" @tap="$manyCk(showList(index, item))" data-target="Modal" data-number="item.number">
 							<view class="text-grey">任务单号:{{item.workNo}}</view>
 							<view class="text-grey">{{index+1}}</view>

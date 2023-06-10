@@ -9,5 +9,21 @@ export default {
             },
 			data: params
         });
-    }
+    },insertBarcode(params) {
+        return Request().post('/custInStockTemBox/insertBarcode', {
+            header: {
+				contentType: 'application/json',
+				accept: '*/*'
+            },
+			data: params
+        });
+    },checkBarcodeUse(params) {
+        return Request().post('/custInStockTemBox/checkBarcodeUse', {
+            header: {
+				contentType: 'application/json',
+				accept: '*/*'
+            },
+			data: params
+        });
+    },
 };

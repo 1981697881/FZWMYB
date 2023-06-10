@@ -18,6 +18,14 @@ export default {
             },
 			data: params
         });
+    },//扫码3
+    checkBarCodefifo(params) {
+        return Request().post('/api/basic/checkBarCodefifo', {
+            header: {
+				accept: '*/*'
+            },
+			data: params
+        });
     },
 	//扫库位码查询仓库
     selectFdCStockIdByFdCSPId(params) {

@@ -20,7 +20,7 @@ export default {
 			baifen: 0
 		};
 	},
-	computed: mapState(['forcedLogin', 'hasLogin', 'account']),
+	computed: mapState(['forcedLogin', 'hasLogin', 'account']),	
 	created() {
 		/**
 		 * 默认登录，这情况为已登录过，而登录缓存还在，后台登录，前端不展示登录页

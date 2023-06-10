@@ -59,7 +59,7 @@
 			<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 				<view v-for="(item, index) in cuIList" :key="index">
 					<view class="cu-list menu-avatar">
-						<view class="cu-item" style="width: 100%;margin-top: 2px;height: 120upx;"
+						<view class="cu-item" style="width: 100%;margin-top: 2px;height: auto;"
 							:class="modalName == 'move-box-' + index ? 'move-cur' : ''" @touchstart="ListTouchStart"
 							@touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index">
 							<view style="clear: both;width: 100%;">

@@ -68,14 +68,41 @@
 				</view>
 			</view>
 		</view>
+		<view class="cu-modal" :class="modalName2 == 'Modal' ? 'show' : ''">
+			<view class="cu-dialog" style="height: auto;">
+				<view class="cu-bar bg-white justify-end" style="height: 60upx;">
+					<view class="content">{{ popupForm.headName }}</view>
+					<view class="action" @tap="hideModal2"><text class="cuIcon-close text-red"></text></view>
+				</view>
+				<view>
+					<view class="cu-item" style="width: 100%;">
+						<view class="flex">
+							<view class="flex-sub">
+								<view class="cu-form-group">
+									<view class="title">数量:</view>
+									<input name="input" type="digit" style="border-bottom: 1px solid;"
+										v-model="popupForm.quantity" />
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view style="clear: both;" class="cu-bar bg-white justify-end padding-bottom-xl">
+					<view class="action">
+						<button class="cu-btn line-green text-green" @tap="hideModal2">取消</button>
+						<button class="cu-btn bg-green margin-left" @tap="$manyCk(saveCom)">确定</button>
+					</view>
+				</view>
+			</view>
+		</view>
 		<scroll-view scroll-y class="page" :style="{ height: pageHeight + 'px' }">
 			<view v-for="(item, index) in cuIList" :key="index">
 				<view class="cu-list menu-avatar">
-					<view class="cu-item" style="width: 100%;margin-top: 2px;height: 320upx;"
+					<view class="cu-item" style="width: 100%;margin-top: 2px;height: auto;"
 						:class="modalName == 'move-box-' + index ? 'move-cur' : ''" @touchstart="ListTouchStart"
 						@touchmove="ListTouchMove" @touchend="ListTouchEnd" :data-target="'move-box-' + index">
-						<view style="clear: both;width: 100%;">
-							<view style="clear: both;width: 100%;" class="grid text-center col-2" data-target="Modal"
+						<view style="clear: both;width: 100%;"  >
+							<view style="clear: both;width: 100%;" @tap="showModal2(index, item)" class="grid text-center col-2" data-target="Modal"
 								data-number="item.number">
 								<view class="text-grey">序号:{{ (item.index = index + 1) }}</view>
 								<view class="text-grey">编码:{{ item.number }}</view>
@@ -86,17 +113,17 @@
 								<view class="text-grey">规格:{{ item.model }}</view>
 								<view class="text-grey"></view>
 								<view class="text-grey">{{ item.stockName }}</view>
-								<view class="text-grey">
-									<picker @change="PickerChange($event, item)" :value="pickerVal" :range-key="'FName'"
-										:range="stockList">
-										<view class="picker">
-											<button class="cu-btn sm round bg-green shadow">
-												<text class="cuIcon-homefill"></text>
-												仓库
-											</button>
-										</view>
-									</picker>
-								</view>
+							</view>
+							<view class="text-grey text-center">
+								<picker @change="PickerChange($event, item)" :value="pickerVal" :range-key="'FName'"
+									:range="stockList">
+									<view class="picker">
+										<button class="cu-btn sm round bg-green shadow">
+											<text class="cuIcon-homefill"></text>
+											仓库
+										</button>
+									</view>
+								</picker>
 							</view>
 						</view>
 						<view class="move">
@@ -145,6 +172,7 @@
 				loadModal: false,
 				pickerVal: null,
 				modalName: null,
+				modalName2: null,
 				gridCol: 3,
 				form: {
 					finBillNo: null,
@@ -157,7 +185,10 @@
 					FCustName: '',
 					fdeptID: ''
 				},
-
+				borrowItem: {},
+				popupForm: {
+					quantity: ''
+				},
 				skin: false,
 				listTouchStart: 0,
 				listTouchDirection: null,
@@ -222,7 +253,8 @@
 									Fauxprice: data[i].Fauxprice,
 									fsourceEntryId: data[i].FEntryID,
 									fsourceTranType: data[i].FTranType,
-									quantity: 0,/* data[i].Fauxqty */
+									quantity: 0,
+									/* data[i].Fauxqty */
 									unitID: data[i].FUnitNumber,
 									unitName: data[i].FUnitName
 								});
@@ -276,6 +308,31 @@
 			}
 		},
 		methods: {
+			showModal2(index, item) {
+				/* if(item.stockId == null || item.stockId == ''){
+						return uni.showToast({
+							icon: 'none',
+							title: '请先选择仓库！',
+						});
+					} */
+				this.modalName2 = 'Modal';
+				if (item.quantity == null || typeof item.quantity == 'undefined') {
+					item.quantity = '';
+				}
+				this.popupForm = {
+					quantity: item.quantity,
+				};
+				this.borrowItem = item;
+			},
+			hideModal2(e) {
+				this.modalName2 = null;
+				this.popupForm = {};
+			},
+			saveCom() {
+				var me = this;
+				me.borrowItem.quantity = me.popupForm.quantity;
+				me.modalName2 = null;
+			},
 			cityClick(item) {
 				this.form.FCustName = item.FName;
 				this.form.FCustNumber = item.FNumber;
@@ -460,7 +517,8 @@
 												if (that.isOrder) {
 													setTimeout(function() {
 														uni.navigateBack({
-															url: '../sales/salesActive?startDate=' + that
+															url: '../sales/salesActive?startDate=' +
+																that
 																.startDate +
 																'&endDate=' + that.endDate
 														});
@@ -656,8 +714,7 @@
 				var that = this;
 				let resData = res.split(';');
 				if (resData.length > 1) {
-					that.addList(
-						{
+					that.addList({
 							FNumber: resData[5],
 							FName: resData[1],
 							FModel: resData[0],
@@ -670,33 +727,33 @@
 						0
 					);
 				} else {
-				basic
-					.barcodeScan({
-						uuid: res
-					})
-					.then(reso => {
-						if (reso.success) {
-							console.log(reso)
-							if(reso.data.length>0){
-								if (resData.length > 1) {
-									that.addList(reso.data[0], resData[4], res, 1);
+					basic
+						.barcodeScan({
+							uuid: res
+						})
+						.then(reso => {
+							if (reso.success) {
+								console.log(reso)
+								if (reso.data.length > 0) {
+									if (resData.length > 1) {
+										that.addList(reso.data[0], resData[4], res, 1);
+									} else {
+										that.addList(reso.data[0], 1, res, 1);
+									}
 								} else {
-									that.addList(reso.data[0], 1, res, 1);
+									uni.showToast({
+										icon: 'none',
+										title: "查不到条码信息"
+									});
 								}
-							}else{
-								uni.showToast({
-									icon: 'none',
-									title: "查不到条码信息"
-								});
+
 							}
-							
-						}
-					})
-					.catch(err => {
-						uni.showToast({
-							icon: 'none',
-							title: err.message
-						});
+						})
+						.catch(err => {
+							uni.showToast({
+								icon: 'none',
+								title: err.message
+								});
 					});
 				}
 			},

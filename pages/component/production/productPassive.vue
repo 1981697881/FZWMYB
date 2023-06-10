@@ -135,7 +135,6 @@
 								</picker>
 							</view>
 						</view>
-
 						<view class="move"><view class="bg-red" @tap="del(index, item)">删除</view></view>
 					</view>
 				</view>

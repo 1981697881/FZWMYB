@@ -144,6 +144,7 @@
 				 			title: res.msg,
 				 		});
 				 		data.userId = res.data['userId']
+						data.pdaId = res.data['id'];
 				 		data.username =res.data['username']
 				 		this.toMain(data);
 				 	}).catch(err => {

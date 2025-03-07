@@ -40,7 +40,7 @@ export default {
     },
 	//装箱列表
 	custInStockTemBoxList(page) {
-		return Request().get('/custInStockTemBox/list/'+page.pageNum+'/'+page.pageSize, {
+		return Request().get('/custInStockTemBox/list/'+page.userId+'/'+page.pageNum+'/'+page.pageSize, {
 		    
 		});
     },//装箱删除

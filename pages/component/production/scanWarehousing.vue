@@ -231,7 +231,7 @@
 			me.loadModal = true;
 			if (service.getUsers().length > 0) {
 				if (service.getUsers()[0].account != '' && service.getUsers()[0].account != 'undefined') {
-					me.form.fbillerID = service.getUsers()[0].userId;
+					me.form.fbillerID = service.getUsers()[0].pdaId;
 					me.form.username = service.getUsers()[0].username;
 					uni.getSystemInfo({
 						success: function(res) {
@@ -335,6 +335,7 @@
 				let that = this;
 				production
 					.custInStockTemBoxList({
+						userId: that.form.fbillerID,
 						pageNum: 1,
 						pageSize: 250
 					})
@@ -417,6 +418,7 @@
 				});
 				portData.custInStockTemBoxes = array;
 				portData.fdate = that.form.fdate;
+				portData.userID = that.form.fbillerID;
 				portData.fbillno = this.form.fbillno;
 				portData.fdeptnumber = this.form.fdeptID;
 				portData.fitemnumber = this.form.fitemnumber;

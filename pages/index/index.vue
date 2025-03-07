@@ -41,6 +41,7 @@ export default {
 								console.log(res);
 								if (res.success) {
 									data.userId = res.data['userId'];
+									data.pdaId = res.data['id'];
 									data.username = res.data['username'];
 									store.commit('login', data);
 									service.clearUser();
@@ -130,7 +131,7 @@ export default {
 				method: 'GET',
 				data: {},
 				success: res => {
-					if (res.data[0].apkData.versionNamen > that.version) {
+					if (res.data[0].apkData.versionName > that.version) {
 						if (plus.networkinfo.getCurrentType() != 3) {
 							uni.showToast({
 								title: '有新的版本发布，检测到您目前非Wifi连接，为节约您的流量，程序已停止自动更新，将在您连接WIFI之后重新检测更新。',
@@ -149,7 +150,7 @@ export default {
 
 						//res.data.androidurl    是apk的下载链接
 						console.log('准备');
-						var dtask = plus.downloader.createDownload(service.getUrls().url + '/pda/fzwmxy.apk', {}, function(d, status) {
+						var dtask = plus.downloader.createDownload(service.getUrls().url + '/pda/fzwmyb.apk', {}, function(d, status) {
 							console.log('开始');
 							// 下载完成
 							if (status == 200) {
@@ -228,7 +229,7 @@ export default {
 		},
 		downWgt: function() {
 			var that = this;
-			var downloadApkUrl = service.getUrls().url + '/pda/fzwmxy.apk';
+			var downloadApkUrl = service.getUrls().url + '/pda/fzwmyb.apk';
 			var dtask = plus.downloader.createDownload(downloadApkUrl, {}, function(d, status) {
 				// 下载完成
 				if (status == 200) {
@@ -306,7 +307,7 @@ export default {
 								}); */
 								that.downWgt(); //下载文件
 								/* //设置 最新版本apk的下载链接
-								var downloadApkUrl = service.getUrls().url+'/pda/fzwmxy.apk';
+								var downloadApkUrl = service.getUrls().url+'/pda/fzwmyb.apk';
 								var dtask = plus.downloader.createDownload(downloadApkUrl, {}, function(d, status) {
 									// 下载完成
 									if (status == 200) {

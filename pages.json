@@ -113,6 +113,9 @@
 		{
 			"path": "pages/component/procurement/procurementPassive",
 			"style": {}
+		},{
+			"path": "pages/component/procurement/scanWarehousing",
+			"style": {}
 		},
 		{
 			"path": "pages/component/outsourcing/emitActive",

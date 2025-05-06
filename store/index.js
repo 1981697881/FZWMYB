@@ -10,6 +10,7 @@ const store = new Vuex.Store({//全局变量定义
         account: "",
         password: "",
         userId:'',
+        pdaId:'',
         token:'',
         pointId:'',
     },
@@ -18,13 +19,15 @@ const store = new Vuex.Store({//全局变量定义
             state.account = user.account || '';
             state.password = user.password || '';
             state.hasLogin = true;
-            state.userId = user.id || '';
+            state.userId = user.userId || '';
+            state.pdaId = user.pdaId || '';
             state.token = user.token || '';
         },
         logout(state) {
            state.account = "";
            state.hasLogin = false;
            state.userId = '';
+           state.pdaId = '';
            state.token = '';
            state.pointId = '';
         },

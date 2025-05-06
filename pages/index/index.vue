@@ -37,8 +37,6 @@ export default {
 						login
 							.login(data)
 							.then(res => {
-								console.log(123);
-								console.log(res);
 								if (res.success) {
 									data.userId = res.data['userId'];
 									data.pdaId = res.data['id'];
